@@ -1,0 +1,258 @@
+.maincontent-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7f8fa;
+  min-height: calc(100vh - 64px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Filters row as a separate horizontal strip */
+.maincontent-filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 97%;
+  max-width: 1280px;
+  margin: 24px 0 12px 0;
+  padding: 0 32px;
+  background: none;
+}
+
+.maincontent-filter {
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+  background: #f3f6fa;
+  height: 34px;
+  padding: 0 14px;
+  min-width: 150px;
+  font-size: 14px;
+  
+}
+
+.maincontent-btn {
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  padding: 0 20px;
+  height: 34px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.maincontent-view { background: #051A36; color: #fff; }
+.maincontent-reset { background: #f2f6fa; color: lab(2.75381% 0 0); }
+.maincontent-contribute { background: #f2f6fa; color: #051A36; }
+.maincontent-recommend { background: #051A36; color: #fff; font-weight: 600; }
+.maincontent-new-participant{background: #051A36; color: #fff;}
+.maincontent-Run{background:#051A36 ;color:#f3f6fa}
+
+.maincontent-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px 0 #e7eaf3a8;
+  width: 92%;
+  max-width: 1280px;
+  padding: 36px 32px 32px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.maincontent-title-row {
+  width: 100%;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.maincontent-title {
+  font-size: 20px ;
+  font-weight: 500 bold;
+  color: #454a55;
+  /* font-family: "Geist", "Geist Fallback semiBold"; */
+}
+.maincontent-search-export {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.maincontent-search {
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+  background: #fff;
+  height: 30px;
+  padding: 0 10px;
+  min-width: 150px;
+  font-size: 1rem;
+   color:#121212 !important; 
+}
+.maincontent-export {
+  background: #051A36;
+  color: #fff;
+  border:1px solid #dde6ee ;
+  border-radius: 8px;
+  font-size: 1rem;
+  height: 30px;
+  padding: 0 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.maincontent-empty {
+  width: 100%;
+  text-align: center;
+  margin-top: 34px;
+}
+.maincontent-empty-text {
+  font-size: 1.13rem;
+  color: #7d8ca2;
+}/* Table container and base styles */
+.table-container {
+  width: 100%;
+  padding: 8px 0;
+  overflow-x: auto; /* Horizontal scroll for narrow screens */
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Geist', Arial, sans-serif;
+  font-size: 12px;
+  background: white;
+  min-width: 700px; /* Adjust based on expected columns */
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.custom-table th {
+  background: #f5f7fb;
+  font-weight: 600;
+  color:#051A36 ;
+  border-bottom: 2px solid #e7eaf3;
+}
+
+.custom-table tbody tr {
+  border-top: 1px solid #e7eaf3;
+}
+
+.custom-table tbody tr:hover {
+  background: #f0f6fd;
+}
+
+/* Details button style */
+.details-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* Slide in sidebar container */
+.details-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px; /* Hidden by default */
+  width: 750px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  box-sizing: border-box;
+  transition: right 0.3s ease-in-out;
+  z-index: 1050;
+  /* overflow-y: auto; */
+  font-family: 'Geist', Arial, sans-serif;
+}
+
+
+.details-sidebar.open {
+  right: 0; /* Slide in */
+}
+
+/* Sidebar header and close button */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sidebar-close-btn {
+  font-size: 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  line-height: 1;
+  color: #486488;
+  font-weight: 700;
+}
+
+/* Sidebar table styles for details */
+.details-modal-table th,
+.details-modal-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e7eaf3;
+  vertical-align: top;
+}
+
+.details-modal-table th {
+  background: #f5f7fb;
+  font-weight: 600;
+}
+
+/* Change control (the input box) style */
+.react-select__control {
+  background: #f3f6fa !important;
+  border: 1px solid #dde6ee !important;
+  border-radius: 8px !important;
+  min-height: 34px !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+  padding:0 14px !important;
+  min-width:40px !important;
+  color:lab(2.75381% 0 0) !important;
+  
+}
+
+/* Change dropdown (popup menu) background and border radius */
+.react-select__menu {
+  background: #fdfdfd !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(239, 239, 239, 0.1);
+  border: 1px solid #dde6ee;
+}
+
+/* Option styling */
+.react-select__option {
+  font-size: 1rem;
+  padding: 10px 14px;
+}
+
+/* Highlight selected/hovered option */
+.react-select__option--is-focused,
+.react-select__option--is-selected {
+   background-color: rgb(241, 241, 241) !important;
+  /* color:  #121212!important; */
+}
+.maincontent-filter[type="date"] {
+  font-family: 'Geist', 'Segoe UI', Arial, sans-serif;   /* Pick your preferred font */
+  font-size: 15px;
+   color: lab(2.75381% 0 0);              /* Changetext color */
+  background: #f3f6fa;          /* Light background */
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+  padding: 0 8px;
+  transition: border 0.15s;
+}
+
+.maincontent-filter[type="date"]:focus {
+  /* border-color: #29519f; */
+  outline: none;
+}

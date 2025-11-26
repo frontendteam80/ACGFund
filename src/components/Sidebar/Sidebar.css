@@ -1,0 +1,33 @@
+.sidebar-container {
+  width: 220px;
+  min-height: calc(100vh - 64px);
+  background: #fff;
+  padding: 24px 0;
+  border-right: 1px solid #eee;
+}
+
+.sidebar-item {
+    font:14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 8px;
+  cursor: pointer;
+  color: #4a5568;
+  font-weight: 400;
+  transition: background 0.2s, color 0.2s;
+  margin: 6px;
+}
+
+.sidebar-item.active {
+  background: rgb(247, 247, 247);
+  color: #051A36;
+  font-weight: 300;
+  border-radius: 8px;
+  box-shadow:-6px 0 0 0 #051A36;
+}
+
+.sidebar-icon {
+  font-size: 18px;
+  color:inherit;
+}

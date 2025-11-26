@@ -1,0 +1,25 @@
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dashboard-topbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.dashboard-main-area {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}

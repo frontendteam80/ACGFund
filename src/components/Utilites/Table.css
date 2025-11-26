@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist&display=swap');
+
+body {
+  font-family: 'Geist', Arial, sans-serif;
+}
+
+.table-container {
+  width: 100%;
+  padding: 8px 0;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-family: 'Geist', Arial, sans-serif;
+  font-size: 1rem;
+}
+
+.custom-table th, .custom-table td {
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.custom-table th {
+  background: #f5f7fb;
+  font-weight: 600;
+  color: #253858;
+  border-bottom: 2px solid #e7eaf3;
+}
+
+.custom-table tbody tr {
+  border-top: 1px solid #e7eaf3;
+}
+
+.custom-table tbody tr:hover {
+  background: #f0f6fd;
+}
+
+.custom-table td:last-child,
+.custom-table th:last-child {
+  text-align: left;
+}
+
+.details-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: right;
+  justify-content: center;
+}
