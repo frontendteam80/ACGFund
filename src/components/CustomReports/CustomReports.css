@@ -13,11 +13,11 @@
 .maincontent-filters-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   gap: 10px;
   width: 97%;
   max-width: 1280px;
-  margin: 24px 0 12px 0;
+  margin: 20px 0 12px 0;
   padding: 0 32px;
   background: none;
 }
@@ -28,7 +28,7 @@
   background: #f3f6fa;
   height: 34px;
   padding: 0 14px;
-  min-width: 150px;
+  width: 100px;
   font-size: 14px;
   
 }
@@ -38,15 +38,16 @@
   border: none;
   font-size: 14px;
   padding: 0 20px;
-  height: 34px;
+  height: 36px;
   font-weight: 400;
   cursor: pointer;
   transition: background 0.2s;
+  background-color: #051A36;
+  color: #f3f6fA;
 }
 .maincontent-view { background: #051A36; color: #fff; }
-.maincontent-reset { background: #f2f6fa; color: lab(2.75381% 0 0); }
-.maincontent-contribute { background: #f2f6fa; color: #051A36; }
-.maincontent-recommend { background: #051A36; color: #fff; font-weight: 600; }
+.maincontent-reset {border: 1px solid #dde6ee; background: #f3f6fA; color: lab(2.75381% 0 0); }
+
 .maincontent-new-participant{background: #051A36; color: #fff;}
 .maincontent-Run{background:#051A36 ;color:#f3f6fa}
 
@@ -215,7 +216,7 @@
   min-height: 34px !important;
   font-size: 15px !important;
   box-shadow: none !important;
-  padding:0 14px !important;
+  /* padding:0 14px !important; */
   min-width:40px !important;
   color:lab(2.75381% 0 0) !important;
   
@@ -239,7 +240,7 @@
 .react-select__option--is-focused,
 .react-select__option--is-selected {
    background-color: rgb(241, 241, 241) !important;
-  /* color:  #121212!important; */
+   color:  #121212!important; 
 }
 .maincontent-filter[type="date"] {
   font-family: 'Geist', 'Segoe UI', Arial, sans-serif;   /* Pick your preferred font */
@@ -255,4 +256,5 @@
 .maincontent-filter[type="date"]:focus {
   /* border-color: #29519f; */
   outline: none;
+  width:100px
 }

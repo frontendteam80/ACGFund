@@ -2,7 +2,7 @@
   width: 220px;
   min-height: calc(100vh - 64px);
   background: #fff;
-  padding: 24px 0;
+  padding: 14px 0;
   border-right: 1px solid #eee;
 }
 
@@ -30,4 +30,9 @@
 .sidebar-icon {
   font-size: 18px;
   color:inherit;
+}
+.sidebar-divider {
+  height: 1px;
+  background-color: #e5e7eb; /* adjust color as needed */
+  margin: 8px 16px;          /* spacing around the line */
 }

@@ -8,6 +8,7 @@ import CustomReports from '../CustomReports/CustomReports.jsx';
 import ProcessData from '../ProcessData/ProcessData.jsx';
 import FundPrice from '../FundPrice/FundPrice.jsx';
 import './Dashboard.css';
+import CreateNew from '../CreateNew/CreateNew.jsx';
 
 const DashboardLayout = ({ children }) => {
   const [activeItem, setActiveItem] = useState('Custom Reports');
@@ -26,6 +27,7 @@ const DashboardLayout = ({ children }) => {
           )}
           {activeItem === 'Process Data' && <ProcessData />}
           {activeItem === 'Fund Price' && <FundPrice />}
+          {activeItem === 'Add Data' && <CreateNew />}
       </div>
     </div>
   );

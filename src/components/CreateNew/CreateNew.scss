@@ -1,0 +1,180 @@
+
+
+ .create-new-container {
+  width: 100%;
+  // max-width: 1200px;
+  // margin: 0 auto;
+   padding: 20px;
+  overflow-x:hidden;
+}
+
+.tabs-container {
+  display: flex;
+ 
+   gap: 5px;
+//   margin-bottom: 30px;
+//   border-bottom: 2px solid #e5e7eb;
+  
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 5px 14px;
+    // background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap:2;
+    
+    &:hover {
+      color: #051a36;
+      background: #cfcfd0;
+      border-radius: 6px;
+    }
+    
+    &.active {
+      color: #051a36;
+      border-bottom-color: #051a36;
+      background: #051a36;
+      color: white;
+      border-radius: 6px;
+    }
+    
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.tab-content-area {
+  width: 100%;
+  
+  // Override sidebar styles to make form display inline
+  .details-sidebar {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    
+    &.open {
+      position: static !important;
+    }
+  }
+  
+  .sidebar-header {
+    display: none !important; // Hide the header with close button
+  }
+  
+  .sidebar-form {
+    background: white;
+     padding-top: 20px;
+    border-radius: 8px;
+    // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
+    h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #051a36;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      
+      &:first-of-type {
+        margin-top: 0;
+      }
+    }
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .field-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    
+    input, select {
+      padding: 4px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      
+      &:focus {
+        outline: none;
+        border-color: #051a36;
+        box-shadow: 0 0 0 3px rgba(5, 26, 54, 0.1);
+      }
+    }
+  }
+  
+  .sidebar-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &.primary {
+        background: #051a36;
+        color: white;
+        border: none;
+        
+        &:hover {
+          background: #0a2447;
+        }
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+      
+      &.ghost {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        
+        &:hover {
+          background: #f9fafb;
+        }
+      }
+    }
+  }
+  
+  // Style the confirmation modal
+  .confirmation-modal {
+    position: fixed !important;
+  }
+}
