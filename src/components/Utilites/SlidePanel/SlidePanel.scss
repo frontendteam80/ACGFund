@@ -1,0 +1,150 @@
+/* SlidePanel.scss — updated for DetailsContent look */
+
+.sp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.32);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s ease, visibility .22s;
+  z-index: 900;
+}
+
+.sp-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sp-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: -12px 0 40px rgba(15, 23, 34, 0.12);
+  transition: right .28s cubic-bezier(.2,.9,.2,1);
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  outline: none;
+  border-left: 1px solid rgba(14, 22, 34, 0.04);
+}
+
+.sp-panel.open {
+  right: 0;
+}
+
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eef2f6;
+  background: #fff;
+  min-height: 56px;
+}
+
+.sp-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1724;
+}
+
+.sp-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sp-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #475569;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.sp-close:hover {
+  background: rgba(9,30,66,0.04);
+}
+
+.sp-body {
+  padding: 20px;
+  overflow: auto;
+  flex: 1 1 ;
+  background: hsl(0, 0%, 100%);
+}
+
+.sp-body > * {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sp-body .dc-card,
+.sp-body .card {
+//   background: #f3f6fa;
+  border: 1px solid #eef2f6;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+  .sp-body {
+    padding: 16px;
+  }
+  .sp-body > * {
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 540px) {
+  .sp-panel {
+    width: 100% !important;
+    right: -100%;
+  }
+
+  .sp-panel.open {
+    right: 0;
+  }
+
+  .sp-body {
+    padding: 12px;
+  }
+
+  .sp-body > * {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.sp-body::-webkit-scrollbar {
+  width: 10px;
+}
+.sp-body::-webkit-scrollbar-thumb {
+  background: rgba(11, 16, 23, 0.12);
+  border-radius: 10px;
+}
+.sp-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sp-header .sp-actions .icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}

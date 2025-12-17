@@ -1,24 +1,25 @@
 
 
  .create-new-container {
-  width: 100%;
+  // width: 100%;
   // max-width: 1200px;
   // margin: 0 auto;
-   padding: 20px;
+      padding: 20px;
   overflow-x:hidden;
+  background: none !important;
 }
 
 .tabs-container {
   display: flex;
  
-   gap: 5px;
+  //  gap: 5px;
 //   margin-bottom: 30px;
 //   border-bottom: 2px solid #e5e7eb;
   
   .tab-btn {
     display: flex;
     align-items: center;
-    border-radius: 6px;
+    // border-radius: 6px;
     padding: 5px 14px;
     // background: transparent;
     border: none;
@@ -29,19 +30,20 @@
     cursor: pointer;
     transition: all 0.2s;
     gap:2;
+    background: #f9fafb;
     
     &:hover {
       color: #051a36;
-      background: #cfcfd0;
-      border-radius: 6px;
+      // background: #cfcfd0;
+      // border-radius: 6px;
     }
     
     &.active {
       color: #051a36;
       border-bottom-color: #051a36;
-      background: #051a36;
+       background: #051a36;
       color: white;
-      border-radius: 6px;
+      // border-radius: 6px;
     }
     
     .tab-icon {
@@ -89,8 +91,9 @@
       margin-bottom: 16px;
       
       &:first-of-type {
-        margin-top: 0;
+         margin-top: 0;
       }
+      
     }
   }
   

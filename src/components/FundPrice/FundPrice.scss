@@ -51,9 +51,9 @@
   display: flex;
   justify-content: flex-start;
   padding-right: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: #3a3a3a;
+  color: #0f172a;
   white-space: nowrap;
   text-align: right;
   width:90px
@@ -61,16 +61,16 @@
 
 /* colon separator between label and input */
 .fundprice-colon {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: #3a3a3a;
+  color: #0f172a;
   margin: 0 5px;
 }
 
 /* label value for read-only display */
 .fundprice-label-value {
-  font-size: 13px;
-  color: #3a3a3a;
+  font-size: 12px;
+  color: #0f172a;
   min-width: 120px;
   
 }

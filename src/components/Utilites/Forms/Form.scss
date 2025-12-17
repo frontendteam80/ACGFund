@@ -1,3 +1,5 @@
+
+
 .details-sidebar {
   position: fixed;
   top: 0;
@@ -7,11 +9,11 @@
   background: #fff;
   box-shadow: -2px 0 20px rgba(9, 30, 66, 0.08);
   z-index: 10001;
-  transition: right 0.35s cubic-bezier(.38,.25,.42,1.02);
+  transition: right 0.35s cubic-bezier(.38, .25, .42, 1.02);
   display: flex;
   flex-direction: column;
   padding: 20px 20px;
-  // overflow-y: auto;
+  /* overflow-y: auto; */
 }
 .details-sidebar.open { right: 0; }
 
@@ -45,20 +47,18 @@
 
 .field input,
 .field select {
-  // width:200px;
-  // height: 42px;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #e6e9ef;
   font-size: 16px;
   color: hsl(0, 0%, 20%);
-  // background: #F3F6fa;
+  
 }
 
-.field input::placeholder { color: #e1dfdf;opacity: 1; }
+.field input::placeholder { color: #e1dfdf; opacity: 1; }
 
 /* make some inputs span full width of the grid */
-// .field.full-width { grid-column: 1 / -1; }
+/* .field.full-width { grid-column: 1 / -1; } */
 
 .sidebar-actions {
   display: flex;
@@ -73,89 +73,85 @@
 
 /* Responsive breakpoints */
 @media (max-width: 1024px) {
-  .form-grid { grid-template-columns: repeat(2, 1fr);}
-  .details-sidebar {overflow-y:auto}
+  .form-grid { grid-template-columns: repeat(2, 1fr); }
+  .details-sidebar { overflow-y: auto; }
 }
 @media (max-width: 640px) {
-  .details-sidebar { width: 100%; right: -100%;overflow-y:auto }
+  .details-sidebar { width: 100%; right: -100%; overflow-y: auto; }
   .details-sidebar.open { right: 0; }
   .form-grid { grid-template-columns: 1fr; }
-  .sidebar-actions { flex-direction: row-reverse; };
-  
+  .sidebar-actions { flex-direction: row-reverse; }
 }
+
 .date-input-wrapper {
-  width: 80px; // or 80px, whatever you want
+  width: 80px; /* adjust as needed */
 }
 
 .date-input-small {
-  // width: 100%;
-  padding-right: 26px; // space for calendar icon
+  padding-right: 26px; /* space for calendar icon */
   font-size: 14px;
 }
-.datepicker{
-  width:80px
+.datepicker {
+  width: 80px;
 }
-/* control (outer box) */
+
+/* react-select overrides for advisor select (classNames: advisor__*) */
 .advisor__control {
-  margin: 0 !important;       /* remove the margin:2px */
-  padding-top: 0 !important;  /* remove padding-top:2px */
-  padding-bottom: 0 !important; /* remove padding-bottom:2px */
-  min-height: 34px;           /* keep a sensible height */
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 34px;
   box-sizing: border-box;
 }
 
-/* the container holding value / placeholder */
 .advisor__value-container {
-  padding: 0 6px !important;  /* reduce left/right padding if needed */
+  padding: 0 6px !important;
   margin: 0 !important;
 }
 
-/* selected value */
 .advisor__single-value {
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* placeholder text */
 .advisor__placeholder {
   margin: 0 !important;
   padding: 0 !important;
   line-height: 20px;
 }
 
-/* menu list wrapper */
 .advisor__menu-list {
   padding: 0 !important;
   margin: 0 !important;
 }
 
-/* each option in dropdown */
 .advisor__option {
-  padding: 4px 8px !important;  /* set to whatever you want (0 if you really want none) */
+  padding: 4px 8px !important;
   margin: 0 !important;
   line-height: 20px;
 }
 
-/* menu container (optional) */
 .advisor__menu {
   margin: 0 !important;
   padding: 0 !important;
   z-index: 9999;
 }
-css-19bb58m {
-    visibility: visible;
-    -webkit-flex: 1 1 auto;
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
-    display: inline-grid;
-    grid-area: 1 / 1 / 2 / 3;
-    grid-template-columns: 0 min-content;
-     margin: 0px !important; 
-    /* padding-bottom: 2px; */
-    padding-top: 0 !important;
-    color: hsl(0, 0%, 20%);
-    box-sizing: border-box;
+
+/* Generated react-select input container class — keep the dot before it */
+.css-19bb58m {
+  visibility: visible;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: inline-grid;
+  grid-area: 1 / 1 / 2 / 3;
+  grid-template-columns: 0 min-content;
+  margin: 0px !important;
+  padding-top: 0 !important;
+  color: hsl(0, 0%, 20%);
+  box-sizing: border-box;
 }
+
 /* Removes the padding/margin from inside react-select input container */
 .advisor__input-container {
   padding: 0 !important;
@@ -163,208 +159,22 @@ css-19bb58m {
   box-sizing: border-box !important;
 
   /* If you want to override the inline-grid layout */
-  display: flex !important;     /* optional – clean flex layout */
+  display: flex !important;
   align-items: center !important;
-
-  // grid-area: unset !important;
-  // grid-template-columns: unset !important;
 }
-/* Form.scss - keep structure & matching styles with react-select matching input look */
 
-// .details-sidebar {
-//   position: fixed;
-//   top: 0;
-//   right: -750px;
-//   width: 750px;
-//   height: 100vh;
-//   background: #fff;
-//   box-shadow: -2px 0 20px rgba(9, 30, 66, 0.08);
-//   z-index: 10001;
-//   transition: right 0.35s cubic-bezier(.38, .25, .42, 1.02);
-//   display: flex;
-//   flex-direction: column;
-//   padding: 20px 20px;
-// }
-// .details-sidebar.open { right: 0; }
+#react-select-5-input {
+  border: none !important;
+  box-shadow: none !important;
+}
 
-// .sidebar-header {
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-//   margin-bottom: 12px;
-// }
-// .sidebar-header h2 { margin: 0; font-size: 18px; color: #0f172a; }
-
-// .sidebar-close-btn {
-//   background: transparent;
-//   border: none;
-//   font-size: 1.6rem;
-//   cursor: pointer;
-//   color: #475569;
-// }
-
-// .sidebar-form { display: flex; flex-direction: column; gap: 12px; }
-
-// .form-grid {
-//   display: grid;
-//   grid-template-columns: repeat(3, 1fr);
-//   gap: 12px;
-// }
-
-// .field { display: flex; flex-direction: column; }
-// .field-label { font-size: 14px; color: hsl(0, 0%, 20%); margin-bottom: 6px; }
-
-// .field input,
-// .field select,
-// .field textarea {
-//   padding: 8px 12px;
-//   border-radius: 8px;
-//   border: 1px solid #e6e9ef;
-//   font-size: 16px;
-//   color: hsl(0, 0%, 20%);
-// }
-
-// .field input::placeholder { color: #e1dfdf; opacity: 1; }
-
-// .sidebar-actions {
-//   display: flex;
-//   justify-content: flex-end;
-//   gap: 10px;
-//   margin-top: 6px;
-// }
-
-// .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-// .btn.ghost { background: #fff; border: 1px solid #e6e9ef; color: #0f172a; }
-// .btn.primary { background: #071a3e; color: #fff; }
-
-// /* small helpers */
-// .form-success {
-//   padding: 12px 16px;
-//   margin: 10px 0;
-//   background: #d4edda;
-//   color: #155724;
-//   border: 1px solid #c3e6cb;
-//   border-radius: 6px;
-// }
-// .form-error {
-//   padding: 12px 16px;
-//   margin: 10px 0;
-//   background: #f8d7da;
-//   color: #721c24;
-//   border: 1px solid #f5c6cb;
-//   border-radius: 6px;
-// }
-// .form-warning {
-//   padding: 12px 16px;
-//   margin: 10px 0;
-//   background: #fff3cd;
-//   color: #856404;
-//   border: 1px solid #ffeaa7;
-//   border-radius: 6px;
-// }
-
-// /* Responsive breakpoints */
-// @media (max-width: 1024px) {
-//   .form-grid { grid-template-columns: repeat(2, 1fr); }
-//   .details-sidebar { overflow-y: auto; }
-// }
-// @media (max-width: 640px) {
-//   .details-sidebar { width: 100%; right: -100%; overflow-y: auto; }
-//   .details-sidebar.open { right: 0; }
-//   .form-grid { grid-template-columns: 1fr; }
-//   .sidebar-actions { flex-direction: row-reverse; }
-// }
-
-// /* Datepicker small wrapper */
-// .date-input-small {
-//   padding-right: 26px;
-//   font-size: 14px;
-// }
-
-// /* react-select -> match .field inputs WITHOUT changing your structure */
-// .advisor__control {
-//   border: 1px solid #e6e9ef !important;
-//   border-radius: 8px !important;
-//   min-height: 40px !important;
-//   background: #fff !important;
-//   box-shadow: none !important;
-//   margin: 0 !important;
-//   padding-top: 0 !important;
-//   padding-bottom: 0 !important;
-//   box-sizing: border-box;
-// }
-
-// .advisor__value-container {
-//   padding: 6px 10px !important;
-//   margin: 0 !important;
-//   height: 40px !important;
-//   align-items: center !important;
-// }
-
-// .advisor__single-value,
-// .advisor__placeholder {
-//   margin: 0 !important;
-//   padding: 0 !important;
-//   line-height: 1.2;
-//   color: hsl(0, 0%, 20%);
-//   font-size: 16px;
-// }
-
-// .advisor__indicator-separator { display: none !important; }
-// .advisor__menu {
-//   margin: 0 !important;
-//   padding: 6px 0 !important;
-//   z-index: 9999;
-// }
-// .advisor__menu-list {
-//   padding: 0 !important;
-//   margin: 0 !important;
-// }
-// .advisor__option {
-//   padding: 8px 12px !important;
-//   margin: 0 !important;
-//   line-height: 20px;
-//   color: hsl(0, 0%, 20%);
-// }
-
-// /* ensure input container has no extra grid/padding */
-// .advisor__input-container {
-//   padding: 0 !important;
-//   margin: 0 !important;
-//   box-sizing: border-box !important;
-//   display: flex !important;
-//   align-items: center !important;
-// }
-
-// /* small button inside DropdownIndicator */
-// .advisor-add-btn {
-//   background: transparent;
-//   border: none;
-//   cursor: pointer;
-//   padding: 4px;
-//   display: inline-flex;
-//   align-items: center;
-//   justify-content: center;
-//   color: #475569;
-// }
-
-// /* confirmation modal styles (simple) */
-// .confirmation-modal {
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   bottom: 0;
-//   z-index: 12000;
-//   background: rgba(0,0,0,0.3);
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
-// .confirmation-box {
-//   background: #fff;
-//   border-radius: 8px;
-//   padding: 24px;
-//   width: 640px;
-//   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-// }
+#react-select-3-input {
+  border: none !important;
+  box-shadow: none !important;
+  grid: 1 !important;
+}
+.react-select__option--is-focused,
+.react-select__option--is-selected {
+   background-color: rgb(241, 241, 241) !important;
+   color:  #121212!important; 
+}

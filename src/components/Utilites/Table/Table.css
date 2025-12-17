@@ -52,3 +52,12 @@ body {
   align-items: right;
   justify-content: center;
 }
+
+/* Add to Table.css */
+.col-center {
+  text-align: center !important;
+}
+
+.actions-col {
+  min-width: 120px;
+}

@@ -1,3 +1,5 @@
+
+
 .dashboard-layout {
   display: flex;
   flex-direction: column;
@@ -7,7 +9,6 @@
 
 .dashboard-topbar {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   height: 64px;
@@ -16,10 +17,22 @@
   flex-shrink: 0;
 }
 
+/* MAIN AREA */
 .dashboard-main-area {
   display: flex;
   flex-direction: row;
+  flex: 1;               /* IMPORTANT */
+  overflow: hidden;       /* prevent double-scroll */
+}
+
+/* CONTENT THAT HOLDS TABLE */
+.dashboard-content {
   flex: 1;
-  height: calc(100vh - 64px);
-  overflow: hidden;
+  /* height: 100%;          fixes white gap */
+  overflow-y: auto;      /* scroll inside */
+  padding: 16px;
+  background: #f7f8fa;
+}
+.dashboard-content.white-bg {
+  background: #fff !important; /* Add Data page only */
 }

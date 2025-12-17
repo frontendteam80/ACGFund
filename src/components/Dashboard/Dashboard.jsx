@@ -1,37 +1,51 @@
 
 
-import React, { useState } from 'react';
+// components/Dashboard/DashboardLayout.jsx
+import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Logo from '../Logo/Logo.jsx';
 import HeaderBar from '../Header/Headerbar.jsx';
 import Sidebar from '../Sidebar/Sidebar.jsx';
-import CustomReports from '../CustomReports/CustomReports.jsx';
-import ProcessData from '../ProcessData/ProcessData.jsx';
-import FundPrice from '../FundPrice/FundPrice.jsx';
 import './Dashboard.css';
-import CreateNew from '../CreateNew/CreateNew.jsx';
 
-const DashboardLayout = ({ children }) => {
-  const [activeItem, setActiveItem] = useState('Custom Reports');
+const pathToLabel = {
+  '/dashboard/custom-reports': 'Custom Reports',
+  '/dashboard/process-data': 'Process Data',
+  '/dashboard/fund-price': 'Fund Price',
+  '/dashboard/add-data': 'Add Data',
+  '/dashboard/edit-data': 'Editdata',
+  '/dashboard/operation-screen': 'Operation Screen', 
+  '/dashboard/update-password':'Update Password',
+
+};
+
+export default function DashboardLayout() {
+  const location = useLocation();
+  const currentPath = location.pathname.toLowerCase();
+
+  const activeLabel =
+    pathToLabel[currentPath] ||
+    (Object.keys(pathToLabel).find(k => currentPath.startsWith(k)) ? 'Custom Reports' : 'Custom Reports');
+
+  const isAddDataPage = currentPath.startsWith('/dashboard/add-data');
 
   return (
     <div className="dashboard-layout">
       <div className="dashboard-topbar">
         <Logo />
-        <HeaderBar activeMenu={activeItem} />
+        <HeaderBar activeMenu={activeLabel} />
       </div>
+
       <div className="dashboard-main-area">
-        <Sidebar activeItem={activeItem} onSelect={setActiveItem} />
-        
-        {activeItem === 'Custom Reports' && (
-            <CustomReports activeItem={activeItem}>{children}</CustomReports>
-          )}
-          {activeItem === 'Process Data' && <ProcessData />}
-          {activeItem === 'Fund Price' && <FundPrice />}
-          {activeItem === 'Add Data' && <CreateNew />}
+        <Sidebar />
+
+        <div
+          key={location.pathname}
+          className={`dashboard-content ${isAddDataPage ? 'white-bg' : ''}`}
+        >
+          <Outlet />
+        </div>
       </div>
     </div>
   );
-};
-
-export default DashboardLayout;
-
+}

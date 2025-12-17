@@ -1,24 +1,23 @@
 
-import React, { useState, useEffect, useRef } from "react";
+
+// src/pages/CreateNew/CreateNew.jsx
+import React, { useState, useEffect } from "react";
 import "./CreateNew.scss";
 import { UserPlus, FileUser } from "lucide-react";
-import AddParticipantForm from "../Utilites/Forms/Form.jsx";
+import AddParticipantForm from "../Utilites/Forms/AddParticipantForm.jsx";
+import AddUserForm from "../Utilites/Forms/AddUserForm.jsx";
 
 let useAuth = null;
 try {
-  useAuth = require("../AuthContext/AuthProvider.jsx").useAuth;
+  useAuth = require("../../AuthContext/AuthProvider.jsx").useAuth;
 } catch (e) {
   useAuth = null;
 }
 
 const CreateNew = ({ token: tokenProp }) => {
-  // use "participant" and "user" as clearer mode keys
-  const [active, setActive] = useState("participant");
+  const [active, setActive] = useState("participant"); // "participant" | "user"
   const [token, setToken] = useState(tokenProp || null);
 
-  const formRef = useRef(null);
-
-  // If useAuth exists, get token from it
   let authCtx = null;
   if (useAuth) {
     try {
@@ -54,136 +53,88 @@ const CreateNew = ({ token: tokenProp }) => {
   }, [tokenProp, authCtx]);
 
   useEffect(() => {
-    console.log("CreateNew resolved token:", token ? `${token.slice(0, 8)}...` : "NO_TOKEN");
+    console.log("CreateNew resolved token:", token ? `${String(token).slice(0, 8)}...` : "NO_TOKEN");
   }, [token]);
 
   const handleSave = (result) => {
     console.log("Saved (CreateNew):", result);
-    // refresh lists or show toast if needed
   };
 
-  // handlers for buttons on the tab row
-  const handleClearClick = () => {
-    try {
-      if (formRef.current && typeof formRef.current.clear === "function") {
-        formRef.current.clear();
-      }
-    } catch (e) {
-      console.error("Clear failed:", e);
-    }
-  };
-
-  const handleConfirmClick = () => {
-    try {
-      if (formRef.current && typeof formRef.current.requestConfirm === "function") {
-        formRef.current.requestConfirm();
-      }
-    } catch (e) {
-      console.error("Confirm failed:", e);
-    }
-  };
-
-  const isSaving = () => {
-    try {
-      return formRef.current && typeof formRef.current.isSaving === "function" ? formRef.current.isSaving() : false;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  const hasAnyField = () => {
-    try {
-      return formRef.current && typeof formRef.current.hasAnyField === "function" ? formRef.current.hasAnyField() : false;
-    } catch (e) {
-      return false;
-    }
-  };
+  
+  function openUserTabWithRole(role = "") {
+   
+    setActive("user");
+    
+  }
 
   return (
     <div className="create-new-container">
-      <div className="tabs-container" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button className={`tab-btn ${active === "participant" ? "active" : ""}`} onClick={() => setActive("participant")}>
-            <UserPlus className="tab-icon" />
-            Add Participant
-          </button>
+      <div className="tabs-container" role="tablist" aria-label="Create new">
+        <button
+          role="tab"
+          aria-selected={active === "participant"}
+          aria-controls="tab-participant"
+          id="tab-btn-participant"
+          className={`tab-btn ${active === "participant" ? "active" : ""}`}
+          onClick={() => setActive("participant")}
+        >
+          <UserPlus className="tab-icon" />
+          Add Participant
+        </button>
 
-          <button className={`tab-btn ${active === "user" ? "active" : ""}`} onClick={() => setActive("user")}>
-            <FileUser className="tab-icon" />
-            Add User
-          </button>
-        </div>
-
-        {/* Right side controls (Clear + Confirm) placed in same row */}
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <button
-            type="button"
-            className="btn"
-            onClick={handleClearClick}
-            disabled={!hasAnyField()}
-            style={{
-              color: "#051A36",
-              padding: "8px 14px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              fontWeight: 500,
-              cursor: hasAnyField() ? "pointer" : "not-allowed",
-              fontSize: "14px",
-              background: "#fff",
-            }}
-          >
-            Clear
-          </button>
-
-          <button
-            type="button"
-            className="btn primary"
-            onClick={handleConfirmClick}
-            disabled={isSaving()}
-            style={{
-              background: "#051A36",
-              color: "#fff",
-              padding: "8px 14px",
-              border: "none",
-              borderRadius: "6px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            {isSaving() ? "Submitting..." : "Confirm"}
-          </button>
-        </div>
+        <button
+          role="tab"
+          aria-selected={active === "user"}
+          aria-controls="tab-user"
+          id="tab-btn-user"
+          className={`tab-btn ${active === "user" ? "active" : ""}`}
+          onClick={() => setActive("user")}
+        >
+          <FileUser className="tab-icon" />
+          Add User
+        </button>
       </div>
 
-      <div className="tab-content-area" style={{ marginTop: 16 }}>
-        {active === "participant" && (
+      <div className="tab-content-area">
+        <div
+          id="tab-participant"
+          role="tabpanel"
+          aria-labelledby="tab-btn-participant"
+          hidden={active !== "participant"}
+          className={`tab-panel ${active === "participant" ? "show" : ""}`}
+        >
           <AddParticipantForm
-            ref={formRef}
             open={true}
             onClose={() => {}}
             onSave={handleSave}
             token={token}
             mode="participant"
-            onRequestAddUser={() => setActive("user")}
+            // when AddParticipantForm calls onRequestAddUser, switch to the user tab and preselect advisor
+            onRequestAddUser={() => openUserTabWithRole("advisor")}
+            // also pass addUserPath if your app needs it
+            addUserPath="/dashboard/create-new" // optional fallback
           />
-        )}
+        </div>
 
-        {active === "user" && (
-          <AddParticipantForm
-            ref={formRef}
+        <div
+          id="tab-user"
+          role="tabpanel"
+          aria-labelledby="tab-btn-user"
+          hidden={active !== "user"}
+          className={`tab-panel ${active === "user" ? "show" : ""}`}
+        >
+          <AddUserForm
             open={true}
             onClose={() => {}}
             onSave={handleSave}
             token={token}
-            mode="user"
-            onRequestAddUser={() => setActive("user")}
+        
+            initialRole={active === "user" ? "advisor" : ""}
           />
-        )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default CreateNew;
-

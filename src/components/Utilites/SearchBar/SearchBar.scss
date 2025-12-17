@@ -1,0 +1,31 @@
+/* src/components/Utilites/SearchBar/SearchBar.scss */
+
+.searchbar-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchbar-input {
+  padding: 8px ;
+  border-radius: 6px;
+  border: 1px solid #dde6ee;
+  min-width: 200px;
+  outline: none;
+  font-size: 14px;
+  color:#121212;
+}
+
+// .searchbar-input:focus {
+// //   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+// //   border-color: #3b82f6;
+// }
+
+.searchbar-clear {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 1;
+}

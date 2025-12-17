@@ -11,20 +11,24 @@ import { Calendar } from "lucide-react";
 import "../CustomReports/CustomReports.css";
 import "./FundPrice.scss";
 
-
+/* ---------------------- helpers ---------------------- */
 
 function getLatestPerFund(rows) {
   const map = new Map();
   (rows || []).forEach((row) => {
     const id = row.FundID;
     if (!id) return;
-    const currentDate = row.LastFundPriceDate ? new Date(String(row.LastFundPriceDate).split("T")[0]) : null;
+    const currentDate = row.LastFundPriceDate
+      ? new Date(String(row.LastFundPriceDate).split("T")[0])
+      : null;
     const existing = map.get(id);
     if (!existing) {
       map.set(id, row);
       return;
     }
-    const existingDate = existing.LastFundPriceDate ? new Date(String(existing.LastFundPriceDate).split("T")[0]) : null;
+    const existingDate = existing.LastFundPriceDate
+      ? new Date(String(existing.LastFundPriceDate).split("T")[0])
+      : null;
     if (!existingDate || (currentDate && currentDate > existingDate)) {
       map.set(id, row);
     }
@@ -44,7 +48,6 @@ function formatMoney(value) {
   });
 }
 
-// Display format (MM-DD-YYYY) for UI
 function formatDateOnly(iso) {
   if (!iso) return "";
   const datePart = String(iso).split("T")[0];
@@ -53,7 +56,6 @@ function formatDateOnly(iso) {
   return `${m}-${d}-${y}`;
 }
 
-// ISO (YYYY-MM-DD) from Date object (used for payloads / internal)
 function isoDateStringFromDate(d) {
   if (!d) return "";
   const yyyy = d.getFullYear();
@@ -62,10 +64,8 @@ function isoDateStringFromDate(d) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-// Parse ISO (YYYY-MM-DD) into Date object (normalize)
 function dateFromIso(iso) {
   if (!iso) return null;
-  // new Date('YYYY-MM-DD') creates a date in UTC midnight; acceptable for comparisons that are date-only.
   return new Date(String(iso));
 }
 
@@ -74,12 +74,35 @@ function dateFromIso(iso) {
 export default function FundPrice() {
   const { user } = useAuth();
   const userId = user?.id || user?.UserID;
+
   const token =
     user?.token ??
     user?.accessToken ??
     user?.authToken ??
     localStorage.getItem("authToken") ??
     null;
+
+  const rawRole =
+    (user &&
+      (user.role ||
+        user.Role ||
+        user.normalizedRole ||
+        user.normalized_role ||
+        user.userRole)) ||
+    "";
+  const roleLower = String(rawRole).toLowerCase().trim();
+
+  const allowedRoles = new Set([
+    "admin",
+    "administrator",
+    "advisor",
+    "adviser",
+    "operational",
+    "operations",
+    "operation",
+    "op",
+  ]);
+  const isAuthorized = allowedRoles.has(roleLower);
 
   const [funds, setFunds] = useState([]);
   const [selectedFundId, setSelectedFundId] = useState("");
@@ -88,7 +111,7 @@ export default function FundPrice() {
   const [fundPriceInput, setFundPriceInput] = useState("");
   const marketRef = useRef(null);
   const fundRef = useRef(null);
-  const [nextPriceDate, setNextPriceDate] = useState(null); // Date object used by the top form
+  const [nextPriceDate, setNextPriceDate] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [pending, setPending] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,21 +120,41 @@ export default function FundPrice() {
   const [successMessage, setSuccessMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // load funds
   useEffect(() => {
+    if (!isAuthorized) {
+      setFunds([]);
+      setLoading(false);
+      return;
+    }
     if (!userId || !token) return;
-    let abort = false;
+
+    let aborted = false;
+    const controller = new AbortController();
+
     const load = async () => {
       setLoading(true);
       setErrorMessage("");
       try {
-        const rows = await fetchFunds(userId, token);
-        if (abort) return;
+        const rows = await fetchFunds(userId, token, {
+          signal: controller.signal,
+          timeoutMs: 15000,
+        });
+        if (aborted) return;
         const latest = getLatestPerFund(rows || []).map((row) => {
-          const lastRaw = row.LastFundPrice ?? row.LastPrice ?? row.LastFundPriceRaw ?? "";
+          const lastRaw =
+            row.LastFundPrice ??
+            row.LastPrice ??
+            row.LastFundPriceRaw ??
+            "";
           const marketRaw = row.MarketValue ?? row.MarketValueRaw ?? "";
-          const nextRawIso = row.NextFundPriceDate ? String(row.NextFundPriceDate).split("T")[0] : "";
+          const nextRawIso = row.NextFundPriceDate
+            ? String(row.NextFundPriceDate).split("T")[0]
+            : "";
           const nextRawDate = nextRawIso ? new Date(nextRawIso) : null;
-          const lastRawIso = row.LastFundPriceDate ? String(row.LastFundPriceDate).split("T")[0] : "";
+          const lastRawIso = row.LastFundPriceDate
+            ? String(row.LastFundPriceDate).split("T")[0]
+            : "";
           return {
             ...row,
             LastFundPriceDateIso: lastRawIso,
@@ -120,22 +163,30 @@ export default function FundPrice() {
             NextFundPriceDate: formatDateOnly(nextRawIso),
             NextFundPriceDateObj: nextRawDate,
             LastFundPriceRaw: lastRaw,
-            LastFundPriceFormatted: lastRaw !== "" ? formatMoney(lastRaw) : "",
+            LastFundPriceFormatted:
+              lastRaw !== "" ? formatMoney(lastRaw) : "",
             MarketValueRaw: marketRaw,
-            MarketValueFormatted: marketRaw !== "" ? formatMoney(marketRaw) : "",
+            MarketValueFormatted:
+              marketRaw !== "" ? formatMoney(marketRaw) : "",
           };
         });
         setFunds(latest);
       } catch (e) {
-        if (!abort) setErrorMessage("Failed to load funds.");
-        console.error(e);
+        if (!(e && e.payload && e.payload.aborted)) {
+          if (!aborted) setErrorMessage("Failed to load funds.");
+          console.error(e);
+        }
       } finally {
-        if (!abort) setLoading(false);
+        if (!aborted) setLoading(false);
       }
     };
+
     load();
-    return () => (abort = true);
-  }, [userId, token]);
+    return () => {
+      aborted = true;
+      controller.abort();
+    };
+  }, [userId, token, isAuthorized]);
 
   const fundOptions = useMemo(
     () =>
@@ -148,7 +199,8 @@ export default function FundPrice() {
   );
 
   const selectedFund = useMemo(
-    () => funds.find((f) => String(f.FundID) === String(selectedFundId)) || null,
+    () =>
+      funds.find((f) => String(f.FundID) === String(selectedFundId)) || null,
     [funds, selectedFundId]
   );
 
@@ -167,9 +219,14 @@ export default function FundPrice() {
     if (!searchTerm.trim()) return funds;
     const term = searchTerm.toLowerCase();
     return funds.filter((r) =>
-      ["Fund", "FundName", "LastFundPriceDate", "NextFundPriceDate", "MarketValueFormatted", "LastFundPriceFormatted"].some((c) =>
-        String(r[c] ?? "").toLowerCase().includes(term)
-      )
+      [
+        "Fund",
+        "FundName",
+        "LastFundPriceDate",
+        "NextFundPriceDate",
+        "MarketValueFormatted",
+        "LastFundPriceFormatted",
+      ].some((c) => String(r[c] ?? "").toLowerCase().includes(term))
     );
   }, [funds, searchTerm]);
 
@@ -191,35 +248,41 @@ export default function FundPrice() {
       setErrorMessage("Select Market Value or Fund Price.");
       return;
     }
-    const activeValue = activeOption === "market" ? marketValueInput : fundPriceInput;
+    const activeValue =
+      activeOption === "market" ? marketValueInput : fundPriceInput;
     if (activeValue === "" || activeValue == null) {
       setErrorMessage("Enter the selected value.");
       return;
     }
 
-    // Use ISO for internal/payload date
-    const nextISO = nextPriceDate ? isoDateStringFromDate(nextPriceDate) : (selectedFund?.NextFundPriceDateIso || "");
+    const nextISO = nextPriceDate
+      ? isoDateStringFromDate(nextPriceDate)
+      : selectedFund?.NextFundPriceDateIso || "";
 
-    // ---------- NEW VALIDATION: prevent next date < last price date ----------
     const lastIso = selectedFund?.LastFundPriceDateIso || "";
     if (nextISO && lastIso) {
-      // Compare date-only
       const dNext = dateFromIso(nextISO);
       const dLast = dateFromIso(lastIso);
       if (dNext && dLast) {
         dNext.setHours(0, 0, 0, 0);
         dLast.setHours(0, 0, 0, 0);
         if (dNext < dLast) {
-          setErrorMessage(`Next Price Date cannot be earlier than Last Price Date (${formatDateOnly(lastIso)}).`);
+          setErrorMessage(
+            `Next Price Date cannot be earlier than Last Price Date (${formatDateOnly(
+              lastIso
+            )}).`
+          );
           return;
         }
       }
     }
-    // ------------------------------------------------------------------------
 
     setPending({
       FundID: selectedFundId,
-      FundName: selectedFund?.FundName || selectedFund?.Fund || `Fund ${selectedFundId}`,
+      FundName:
+        selectedFund?.FundName ||
+        selectedFund?.Fund ||
+        `Fund ${selectedFundId}`,
       ValueType: activeOption === "market" ? "Market Value" : "Fund Price",
       Value: Number(activeValue),
       NextFundPriceDateIso: nextISO,
@@ -229,41 +292,73 @@ export default function FundPrice() {
   };
 
   const handleConfirm = async () => {
-    if (!pending) return;
+    if (!pending || !selectedFund) return;
+
     setErrorMessage("");
     setSuccessMessage("");
     setSaving(true);
 
-    const todayISO = new Date().toISOString().split("T")[0];
+    const lastPriceDateIso = selectedFund.LastFundPriceDateIso || "";
+    const nextPriceDateIso = pending.NextFundPriceDateIso || "";
 
     const payload = {
-      FundID: pending.FundID,
-      FundName: pending.FundName,
-      LastFundPriceDate: todayISO,
-      NextFundPriceDate: pending.NextFundPriceDateIso || "",
-      MarketValue: pending.ValueType === "Market Value" ? Number(pending.Value) : null,
-      FundValue: pending.ValueType === "Fund Price" ? Number(pending.Value) : null,
+      FundID: Number(pending.FundID),
+      FundName:
+        selectedFund.FundName ||
+        selectedFund.Fund ||
+        pending.FundName,
+      LastFundPriceDate: lastPriceDateIso,
+      NextFundPriceDate: nextPriceDateIso,
+      FundPriceType:
+        pending.ValueType === "Market Value" ? "MarketValue" : "FundPrice",
+      MarketValue:
+        pending.ValueType === "Market Value" ? Number(pending.Value) : 0,
+      FundValue:
+        pending.ValueType === "Fund Price" ? Number(pending.Value) : 0,
       LastFundPrice:
-        selectedFund?.LastFundPriceRaw !== undefined && selectedFund?.LastFundPriceRaw !== ""
+        selectedFund.LastFundPriceRaw !== undefined &&
+        selectedFund.LastFundPriceRaw !== ""
           ? Number(selectedFund.LastFundPriceRaw)
-          : null,
+          : 0,
       UserID: userId,
     };
 
     try {
       const result = await addFundPrice(payload, token);
-      const serverRow = (result && (result.data || result.Data || result.Result || result.Row)) || null;
+      console.log("[FundPrice] addFundPrice payload:", payload);
+      console.log("[FundPrice] addFundPrice result:", result);
 
-      // Build rowToInsert with ISO stored internally; display uses formatted version.
+      if (result?.ProcessCode && result.ProcessCode !== 0) {
+        setErrorMessage(
+          result.processMessage ||
+            result.ProcessMessage ||
+            `Save failed (code ${result.ProcessCode}).`
+        );
+        return;
+      }
+
+      const successMsg =
+        result?.processMessage ||
+        result?.ProcessMessage ||
+        "Saved successfully.";
+      setSuccessMessage(successMsg);
+
       const newRow = {
         FundID: pending.FundID,
-        Fund: pending.FundID,
-        FundName: pending.FundName,
-        LastFundPriceDateIso: todayISO,
-        LastFundPriceDate: formatDateOnly(todayISO),
-        NextFundPriceDateIso: pending.NextFundPriceDateIso || (selectedFund?.NextFundPriceDateIso || ""),
-        NextFundPriceDate: pending.NextFundPriceDateIso ? formatDateOnly(pending.NextFundPriceDateIso) : (selectedFund?.NextFundPriceDate || ""),
-        NextFundPriceDateObj: pending.NextFundPriceDateIso ? dateFromIso(pending.NextFundPriceDateIso) : (selectedFund?.NextFundPriceDateObj || null),
+        Fund: selectedFund.Fund ?? pending.FundID,
+        FundName:
+          selectedFund.FundName ||
+          selectedFund.Fund ||
+          pending.FundName,
+        LastFundPriceDateIso: lastPriceDateIso,
+        LastFundPriceDate: formatDateOnly(lastPriceDateIso),
+        NextFundPriceDateIso: nextPriceDateIso,
+        NextFundPriceDate: nextPriceDateIso
+          ? formatDateOnly(nextPriceDateIso)
+          : "",
+        NextFundPriceDateObj: nextPriceDateIso
+          ? dateFromIso(nextPriceDateIso)
+          : null,
       };
 
       if (pending.ValueType === "Market Value") {
@@ -274,39 +369,22 @@ export default function FundPrice() {
         newRow.FundValueFormatted = formatMoney(Number(pending.Value));
       }
 
-      if (selectedFund?.LastFundPriceRaw !== undefined && selectedFund?.LastFundPriceRaw !== "") {
+      if (
+        selectedFund.LastFundPriceRaw !== undefined &&
+        selectedFund.LastFundPriceRaw !== ""
+      ) {
         newRow.LastFundPrice = Number(selectedFund.LastFundPriceRaw);
-        newRow.LastFundPriceFormatted = formatMoney(Number(selectedFund.LastFundPriceRaw));
+        newRow.LastFundPriceFormatted = formatMoney(
+          Number(selectedFund.LastFundPriceRaw)
+        );
       }
 
-      const rowToInsert = serverRow
-        ? {
-            ...serverRow,
-            LastFundPriceDateIso: serverRow.LastFundPriceDate ? String(serverRow.LastFundPriceDate).split("T")[0] : todayISO,
-            LastFundPriceDate: formatDateOnly(serverRow.LastFundPriceDate ? String(serverRow.LastFundPriceDate).split("T")[0] : todayISO),
-            NextFundPriceDateIso: serverRow.NextFundPriceDate ? String(serverRow.NextFundPriceDate).split("T")[0] : (pending.NextFundPriceDateIso || selectedFund?.NextFundPriceDateIso || ""),
-            NextFundPriceDate: serverRow.NextFundPriceDate
-              ? formatDateOnly(String(serverRow.NextFundPriceDate).split("T")[0])
-              : (newRow.NextFundPriceDate || ""),
-            NextFundPriceDateObj: serverRow.NextFundPriceDate ? dateFromIso(String(serverRow.NextFundPriceDate).split("T")[0]) : (newRow.NextFundPriceDateObj || null),
-            MarketValueFormatted: serverRow.MarketValue
-              ? formatMoney(serverRow.MarketValue)
-              : newRow.MarketValueFormatted || "",
-            FundValueFormatted: serverRow.FundValue
-              ? formatMoney(serverRow.FundValue)
-              : newRow.FundValueFormatted || "",
-            LastFundPriceFormatted: serverRow.LastFundPrice
-              ? formatMoney(serverRow.LastFundPrice)
-              : newRow.LastFundPriceFormatted || "",
-          }
-        : newRow;
-
       setFunds((prev) => {
-        const others = prev.filter((r) => String(r.FundID) !== String(rowToInsert.FundID));
-        return [...others, rowToInsert];
+        const map = new Map(prev.map((r) => [String(r.FundID), r]));
+        map.set(String(newRow.FundID), newRow);
+        return Array.from(map.values());
       });
 
-      // reset
       setShowModal(false);
       setPending(null);
       setActiveOption("");
@@ -315,12 +393,13 @@ export default function FundPrice() {
       setNextPriceDate(null);
       setSelectedFundId("");
 
-      setSuccessMessage("Saved successfully.");
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err) {
-      const msg = (err && err.message) ? err.message : "Failed to save fund price.";
-      setErrorMessage(msg);
       console.error("[handleConfirm] save failed:", err);
+      let errorMsg = "Failed to save fund price.";
+      if (err.payload?.body?.message) errorMsg = err.payload.body.message;
+      else if (err.message) errorMsg = err.message;
+      setErrorMessage(errorMsg);
     } finally {
       setSaving(false);
     }
@@ -340,7 +419,6 @@ export default function FundPrice() {
     setSuccessMessage("");
   };
 
-  // Custom renderer for editable Next Price Date in table cell
   const renderNextPriceDateCell = (row) => {
     return (
       <div style={{ position: "relative", width: 140 }}>
@@ -366,7 +444,6 @@ export default function FundPrice() {
                   : r
               )
             );
-            // If the edited row is selected fund, update form state too
             if (String(row.FundID) === String(selectedFundId)) {
               setNextPriceDate(date || null);
             }
@@ -375,8 +452,9 @@ export default function FundPrice() {
           className="fundprice-input"
           placeholderText="Next Price Date"
           isClearable
-          // prevent selecting a date earlier than last price date for that row
-          minDate={row.LastFundPriceDateIso ? dateFromIso(row.LastFundPriceDateIso) : null}
+          minDate={
+            row.LastFundPriceDateIso ? dateFromIso(row.LastFundPriceDateIso) : null
+          }
         />
         <Calendar
           size={16}
@@ -393,6 +471,28 @@ export default function FundPrice() {
     );
   };
 
+  if (!isAuthorized) {
+    return (
+      <main className="maincontent-container">
+        <div
+          className="maincontent-card"
+          style={{ padding: 20, textAlign: "center" }}
+        >
+          <h2>Access denied</h2>
+          <p>
+            You do not have permission to view or edit fund prices. If you
+            believe this is an error, contact your administrator.
+          </p>
+          <div style={{ marginTop: 8, color: "#555" }}>
+            <small>
+              Detected role: <strong>{rawRole || "unknown"}</strong>
+            </small>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="maincontent-container">
       <div className="fundprice-wrapper">
@@ -405,18 +505,28 @@ export default function FundPrice() {
           }}
         >
           <div className="fundprice-messages">
-            {errorMessage && <div style={{ color: "crimson", marginTop: 8 }}>{errorMessage}</div>}
-            {successMessage && <div style={{ color: "green", marginTop: 8 }}>{successMessage}</div>}
+            {errorMessage && (
+              <div style={{ color: "crimson", marginTop: 8 }}>{errorMessage}</div>
+            )}
+            {successMessage && (
+              <div style={{ color: "green", marginTop: 8 }}>{successMessage}</div>
+            )}
           </div>
 
           {/* Select Fund */}
           <div className="fundprice-form-field">
-            <label className="fundprice-label" style={{ paddingLeft: 0 }}>Select Fund</label>
+            <label className="fundprice-label" style={{ paddingLeft: 0 }}>
+              Select Fund
+            </label>
             <span className="fundprice-colon">:</span>
             <div className="fundprice-select" style={{ paddingLeft: 0 }}>
               <Select
                 options={fundOptions}
-                value={fundOptions.find((o) => String(o.value) === String(selectedFundId)) || null}
+                value={
+                  fundOptions.find(
+                    (o) => String(o.value) === String(selectedFundId)
+                  ) || null
+                }
                 onChange={(opt) => {
                   setSelectedFundId(opt ? opt.value : "");
                 }}
@@ -441,20 +551,25 @@ export default function FundPrice() {
                 <div className="LastPriceDate">
                   <label className="fundprice-label">Last Price Date</label>
                   <span className="fundprice-colon">:</span>
-                  <div className="fundprice-label-value" style={{ paddingLeft: "10px" }}>{selectedFund.LastFundPriceDate || ""}</div>
+                  <div
+                    className="fundprice-label-value"
+                    style={{ paddingLeft: "10px" }}
+                  >
+                    {selectedFund.LastFundPriceDate || ""}
+                  </div>
                 </div>
                 <div className="LastPrice">
-                  <label className="fundprice-label">
-                    Last Fund Price
-                  </label>
+                  <label className="fundprice-label">Last Fund Price</label>
                   <span className="fundprice-colon">:</span>
-                  <div className="fundprice-label-value">{formatMoney(selectedFund.LastFundPriceRaw)}</div>
+                  <div className="fundprice-label-value">
+                    {formatMoney(selectedFund.LastFundPriceRaw)}
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Next Price Date + Type Value (radio buttons) */}
+          {/* Next Price Date + Type Value */}
           {selectedFund && (
             <div className="fundprice-form-field">
               <div className="NextPrice-row">
@@ -469,22 +584,39 @@ export default function FundPrice() {
                       className="fundprice-input"
                       placeholderText="Next Price date"
                       isClearable
-                      // <- NEW: set minimum selectable date to last price date if available
-                      minDate={selectedFund?.LastFundPriceDateIso ? dateFromIso(selectedFund.LastFundPriceDateIso) : null}
+                      minDate={
+                        selectedFund?.LastFundPriceDateIso
+                          ? dateFromIso(selectedFund.LastFundPriceDateIso)
+                          : null
+                      }
                     />
                     <Calendar
                       size={18}
-                      style={{ position: "absolute", right: "10px", top: "45%", transform: "translateY(-50%)", pointerEvents: "none", color: "#6b7280" }}
+                      style={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "45%",
+                        transform: "translateY(-50%)",
+                        pointerEvents: "none",
+                        color: "#6b7280",
+                      }}
                     />
                   </div>
                 </div>
                 <div className="ValueType">
-                  <label className="fundprice-label">
-                    Value Type
-                  </label>
-                  <span className="fundprice-colon" style={{ gap: 0 }}>:</span>
+                  <label className="fundprice-label">Value Type</label>
+                  <span className="fundprice-colon" style={{ gap: 0 }}>
+                    :
+                  </span>
                   <div style={{ display: "flex", gap: 5 }}>
-                    <label style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: 5 }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: 5,
+                      }}
+                    >
                       <input
                         type="radio"
                         name="valueOption"
@@ -493,7 +625,14 @@ export default function FundPrice() {
                       />
                       <span style={{ fontSize: 13 }}>Market Value</span>
                     </label>
-                    <label style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: 5 }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        gap: 5,
+                      }}
+                    >
                       <input
                         type="radio"
                         name="valueOption"
@@ -511,14 +650,20 @@ export default function FundPrice() {
           {/* Input for selected value type */}
           {selectedFund && activeOption && (
             <div className="fundprice-form-field">
-              <label className="fundprice-label">{activeOption === "market" ? "Market Value" : "Fund Price"}</label>
+              <label className="fundprice-label">
+                {activeOption === "market" ? "Market Value" : "Fund Price"}
+              </label>
               <span className="fundprice-colon">:</span>
               <input
                 ref={activeOption === "market" ? marketRef : fundRef}
                 type="number"
                 className="fundprice-input usd-input"
-                placeholder={activeOption === "market" ? " Market Value" : " Fund Price"}
-                value={activeOption === "market" ? marketValueInput : fundPriceInput}
+                placeholder={
+                  activeOption === "market" ? " Market Value" : " Fund Price"
+                }
+                value={
+                  activeOption === "market" ? marketValueInput : fundPriceInput
+                }
                 onChange={(e) => {
                   if (activeOption === "market") {
                     setMarketValueInput(e.target.value);
@@ -532,20 +677,29 @@ export default function FundPrice() {
 
           {/* Actions */}
           <div className="fundprice-form-actions">
-            <button type="submit" className="maincontent-btn maincontent-primary">
+            <button
+              type="submit"
+              className="maincontent-btn maincontent-primary"
+            >
               Submit
             </button>
-            <button type="button" className="maincontent-btn maincontent-reset" onClick={handleReset}>
+            <button
+              type="button"
+              className="maincontent-btn maincontent-reset"
+              onClick={handleReset}
+            >
               Reset
             </button>
           </div>
         </form>
 
-        {/* Modal overlay confirmation */}
+        {/* Modal */}
         {showModal && pending && (
           <div className="modal-backdrop" role="dialog" aria-modal="true">
             <div className="modal-card">
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>Confirm update</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                Confirm update
+              </div>
 
               <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
                 <div style={{ minWidth: 140, fontWeight: 600 }}>Fund</div>
@@ -563,7 +717,9 @@ export default function FundPrice() {
               </div>
 
               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                <div style={{ minWidth: 140, fontWeight: 600 }}>Next Price Date</div>
+                <div style={{ minWidth: 140, fontWeight: 600 }}>
+                  Next Price Date
+                </div>
                 <div>
                   {pending.NextFundPriceDateIso
                     ? formatDateOnly(pending.NextFundPriceDateIso)
@@ -572,11 +728,19 @@ export default function FundPrice() {
               </div>
 
               <div style={{ display: "flex", gap: 8 }}>
-                <button className="maincontent-btn maincontent-primary" onClick={handleConfirm} disabled={saving}>
+                <button
+                  className="maincontent-btn maincontent-primary"
+                  onClick={handleConfirm}
+                  disabled={saving}
+                >
                   {saving ? "Saving..." : "Confirm"}
                 </button>
 
-                <button className="maincontent-btn maincontent-secondary" onClick={handleEdit} disabled={saving}>
+                <button
+                  className="maincontent-btn maincontent-secondary"
+                  onClick={handleEdit}
+                  disabled={saving}
+                >
                   Edit
                 </button>
               </div>
@@ -587,7 +751,10 @@ export default function FundPrice() {
 
       {/* TABLE */}
       <div className="maincontent-card">
-        <div className="maincontent-title-row" style={{ marginBottom: "10px" }}>
+        <div
+          className="maincontent-title-row"
+          style={{ marginBottom: "10px" }}
+        >
           <div style={{ fontWeight: 700 }}>Fund Prices</div>
           <div style={{ marginLeft: "auto" }}>
             <input
@@ -595,6 +762,7 @@ export default function FundPrice() {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search funds"
             />
           </div>
         </div>

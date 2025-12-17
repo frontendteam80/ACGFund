@@ -1,15 +1,16 @@
 
+// src/components/CustomReports/MainContent.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../AuthContext/AuthContext.jsx';
 import { fetchCustomReportsList, fetchCustomReportData } from '../../AuthContext/Api.jsx';
 import Table from '../Utilites/Table/Table.jsx';
 import * as XLSX from 'xlsx';
-import './CustomReports.css';
 import { Download, RotateCw, Calendar } from 'lucide-react';
-import Select from 'react-select';
-// import AddParticipantForm from '../Forms/Form.jsx';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+// import "react-datepicker/dist/react-datepicker.css";
+import Select from "../Utilites/DropDown/DropDown.jsx";
+import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
+import './CustomReports.css';
 
 function resolveUserId(u) {
   if (!u) return null;
@@ -32,13 +33,12 @@ function roleAllowsReports(u) {
   return raw.includes('admin') || raw.includes('op') || raw.includes('advisor') || raw.includes('advis');
 }
 
-// Helper: which report names require **only** an End Date (tolerant partial match)
 function isEndDateOnlyReportName(name) {
   if (!name) return false;
   const lower = String(name).toLowerCase();
   const patterns = [
-    'bill pay char',    // covers 'bill pay charities' and variants
-    'bill add vendor',  // covers 'bill add vendor' / 'vendors'
+    'bill pay char',
+    'bill add vendor',
     'bill add vendors',
     'bill pay charity',
   ];
@@ -61,10 +61,8 @@ export default function MainContent({ activeItem }) {
   const [sidebarData, setSidebarData] = useState(null);
   const [reportName, setReportName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  // const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedOperation, setSelectedOperation] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
 
   const normalizedActive = (activeItem || '').toString().trim().toLowerCase();
   const userId = useMemo(() => resolveUserId(user), [user]);
@@ -80,15 +78,6 @@ export default function MainContent({ activeItem }) {
   useEffect(() => {
     let aborted = false;
     async function loadReports() {
-      if (normalizedActive !== 'custom reports') {
-        setReports([]);
-        setSelectedType(null);
-        setSelectedOperation(null);
-        setSelectedReportId('');
-        setReportName('');
-        setErrorMessage('');
-        return;
-      }
       if (!canViewReports) {
         setReports([]);
         return;
@@ -123,19 +112,6 @@ export default function MainContent({ activeItem }) {
     };
   }, [normalizedActive, userId, token, canViewReports, user]);
 
-  async function refreshReports() {
-    if (!userId || !token) return;
-    try {
-      setLoading(true);
-      const arr = await fetchCustomReportsList(userId, token);
-      setReports(arr || []);
-    } catch (err) {
-      console.error('[MainContent] refreshReports error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   const { typeOptions, operationsByType } = useMemo(() => {
     const typesSet = new Set();
     const grouped = {};
@@ -143,9 +119,10 @@ export default function MainContent({ activeItem }) {
       if (r.AdminCustomReportName && r.AdminCustomReportID) {
         const [type, operation] = r.AdminCustomReportName.split(' - ');
         if (type && operation) {
-          typesSet.add(type.trim());
-          if (!grouped[type.trim()]) grouped[type.trim()] = [];
-          grouped[type.trim()].push({
+          const t = type.trim();
+          typesSet.add(t);
+          if (!grouped[t]) grouped[t] = [];
+          grouped[t].push({
             label: operation.trim(),
             value: r.AdminCustomReportID,
             fullLabel: r.AdminCustomReportName
@@ -163,14 +140,10 @@ export default function MainContent({ activeItem }) {
 
   const filteredOperationOptions = useMemo(() => {
     if (!selectedType || selectedType.value === "all") {
-      // All selected in report: show all operations across reports
       return Object.values(operationsByType).flat();
     }
-    // Specific report selected: operations limited to that report, no "All" option
     return operationsByType[selectedType.value] || [];
   }, [selectedType, operationsByType]);
-
-  const filteredOperationOptionsWithAll = filteredOperationOptions;
 
   const handleTypeChange = (opt) => {
     setSelectedType(opt);
@@ -178,7 +151,6 @@ export default function MainContent({ activeItem }) {
     setSelectedReportId('');
     setReportName('');
     setErrorMessage('');
-    // clear dates & data when changing type
     setFromDate(null);
     setToDate(null);
     setReportData([]);
@@ -189,31 +161,28 @@ export default function MainContent({ activeItem }) {
     setSelectedReportId(opt && opt.value !== "all" ? opt.value : '');
     setReportName(opt && opt.value !== "all" ? opt.fullLabel : '');
     setErrorMessage('');
-    // Clear previous date selections and results when switching operations
     setFromDate(null);
     setToDate(null);
     setReportData([]);
   };
 
-  // Use YYYY-MM-DD for API (same as ProcessData component)
   function formatDateForApi(date) {
     if (!date || !(date instanceof Date)) return '';
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+    return `${mm}-${dd}-${yyyy}`;
   }
 
-  async function fetchMultipleReportsData(userId, reportIds, token, from, to) {
+  async function fetchMultipleReportsData(userIdParam, reportIds, tokenParam, from, to) {
     const combinedData = [];
     for (const id of reportIds) {
-      const data = await fetchCustomReportData(userId, id, token, from, to);
+      const data = await fetchCustomReportData(userIdParam, id, tokenParam, from, to);
       if (Array.isArray(data)) combinedData.push(...data);
     }
     return combinedData;
   }
 
-  // Determine active label and whether this report requires only an End Date
   const activeReportLabel = reportName || (selectedOperation && selectedOperation.fullLabel) || '';
   const showOnlyEndDate = isEndDateOnlyReportName(activeReportLabel);
 
@@ -226,11 +195,9 @@ export default function MainContent({ activeItem }) {
     setDataLoading(true);
 
     try {
-      // if report requires only end date, omit beginDate
       const beginDate = showOnlyEndDate ? '' : formatDateForApi(fromDate);
       const endDate = formatDateForApi(toDate);
 
-      // validation
       if (showOnlyEndDate && !endDate) {
         setErrorMessage('Please select an End Date.');
         setDataLoading(false);
@@ -269,7 +236,6 @@ export default function MainContent({ activeItem }) {
     }
   };
 
-  // Auto-load when toDate is selected for end-date-only reports
   useEffect(() => {
     if (!showOnlyEndDate) return;
     if (!toDate || !selectedReportId) return;
@@ -309,7 +275,7 @@ export default function MainContent({ activeItem }) {
         clearTimeout(autoLoadTimeoutRef.current);
       }
     };
-  }, [selectedReportId]);
+  }, [selectedReportId, userId, token]); // included userId & token to avoid stale values
 
   const allColumns = reportData.length > 0 ? Object.keys(reportData[0]) : [];
   const visibleColumns = allColumns.slice(0, 6);
@@ -349,17 +315,6 @@ export default function MainContent({ activeItem }) {
     XLSX.writeFile(workbook, fileName);
   };
 
-  // const handleParticipantSaved = async (apiResult) => {
-  //   console.log('[MainContent] participant saved:', apiResult);
-  //   setShowAddParticipant(false);
-  //   setSuccessMessage('Participant added successfully.');
-  //   setTimeout(() => setSuccessMessage(''), 4000);
-  //   await refreshReports();
-  //   if (selectedReportId) {
-  //     handleView();
-  //   }
-  // };
-
   return (
     <main className="maincontent-container">
       <div className="maincontent-filters-row">
@@ -371,23 +326,24 @@ export default function MainContent({ activeItem }) {
                   options={typeOptionsWithAll}
                   value={selectedType}
                   onChange={handleTypeChange}
-                  isDisabled={loading}
+                  isClearable
                   placeholder="Select Report"
                   classNamePrefix="react-select"
                 />
               </div>
               <div style={{ minWidth: 180 }}>
                 <Select
-                  options={filteredOperationOptionsWithAll}
+                  options={filteredOperationOptions}
                   value={selectedOperation}
                   onChange={handleOperationChange}
+                  isClearable
+                  isSearchable
                   isDisabled={!selectedType || loading}
                   placeholder="Select Report Type"
                   classNamePrefix="react-select"
                 />
               </div>
 
-              {/* Date pickers - show only End Date for certain reports */}
               <div style={{ position: "relative", display: "inline-block" }}>
                 {!showOnlyEndDate && (
                   <div style={{ position: "relative", display: "inline-block", marginRight: 8 }}>
@@ -413,7 +369,7 @@ export default function MainContent({ activeItem }) {
                       setErrorMessage('');
                     }}
                     dateFormat="MM-dd-yyyy"
-                    placeholderText={showOnlyEndDate ? "End Date" : "End Date"}
+                    placeholderText="End Date"
                     className="maincontent-filter"
                   />
                   <Calendar
@@ -437,54 +393,26 @@ export default function MainContent({ activeItem }) {
         </div>
       </div>
 
-      {successMessage && (
-        <div style={{ color: 'green', margin: '6px 0', fontWeight: 500 }}>{successMessage}</div>
-      )}
-
-      {/* <AddParticipantForm
-        open={showAddParticipant}
-        onClose={() => setShowAddParticipant(false)}
-        onSave={handleParticipantSaved}
-        token={token}
-      /> */}
-
-      {showSidebar && (
-        <aside className="details-sidebar open">
-          <div className="sidebar-header">
-            <button className="sidebar-close-btn" onClick={closeSidebar} type="button">×</button>
-            <h2>Details</h2>
-          </div>
-          <div className="sidebar-content">
-            {sidebarData && Object.keys(sidebarData).length > 0 ? (
-              Object.entries(sidebarData).map(([key, val]) => (
-                <div className="sidebar-row" key={key}>
-                  <span className="sidebar-label">{key}:</span>
-                  <span className="sidebar-value">{val == null ? '' : String(val)}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: '#788' }}>No details available</div>
-            )}
-          </div>
-        </aside>
+      {errorMessage && (
+        <div style={{ color: 'crimson', padding: 8 }}>{errorMessage}</div>
       )}
 
       <div className="maincontent-card">
         <div className="maincontent-title-row">
           <div style={{ fontWeight: 'bold', marginBottom: 12, color: '#121212' }}>
             {reportName ? (
-              <>Report: <span style={{ fontWeight: 600 }}>{reportName}</span> </>
+              <>Report: <span style={{ fontWeight: 600 }}>{reportName}</span> </> 
             ) : (
               <>Report Results </>
             )}
           </div>
           <div className="maincontent-search-export">
-            <input
-              className="maincontent-search"
-              placeholder="Search reports..."
+            <SearchBar
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ color: "#121212" }}
+              onChange={setSearchTerm}
+              onSearch={setSearchTerm}
+              placeholder="Search reports..."
+              className="maincontent-search"
             />
             <button
               className="maincontent-export"
@@ -499,10 +427,6 @@ export default function MainContent({ activeItem }) {
             </button>
           </div>
         </div>
-
-        {errorMessage && (
-          <div style={{ color: 'crimson', padding: 8 }}>{errorMessage}</div>
-        )}
 
         {dataLoading ? (
           <div className="maincontent-empty">Loading Report Data...</div>
@@ -528,6 +452,27 @@ export default function MainContent({ activeItem }) {
           </div>
         )}
       </div>
+
+      {showSidebar && (
+        <aside className="details-sidebar open">
+          <div className="sidebar-header">
+            <button className="sidebar-close-btn" onClick={closeSidebar} type="button">×</button>
+            <h2>Details</h2>
+          </div>
+          <div className="sidebar-content">
+            {sidebarData && Object.keys(sidebarData).length > 0 ? (
+              Object.entries(sidebarData).map(([key, val]) => (
+                <div className="sidebar-row" key={key}>
+                  <span className="sidebar-label">{key}:</span>
+                  <span className="sidebar-value">{val == null ? '' : String(val)}</span>
+                </div>
+              ))
+            ) : (
+              <div style={{ color: '#788' }}>No details available</div>
+            )}
+          </div>
+        </aside>
+      )}
     </main>
   );
 }

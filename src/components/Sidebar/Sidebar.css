@@ -1,4 +1,4 @@
-.sidebar-container {
+/* .sidebar-container {
   width: 220px;
   min-height: calc(100vh - 64px);
   background: #fff;
@@ -34,5 +34,63 @@
 .sidebar-divider {
   height: 1px;
   background-color: #e5e7eb; /* adjust color as needed */
-  margin: 8px 16px;          /* spacing around the line */
+  /* margin: 8px 16px;          spacing around the line
+} */ 
+
+.sidebar-container {
+  width: 220px;
+  min-height: calc(100vh - 64px);
+  background: #fff;
+  padding: 14px 0;
+  border-right: 1px solid #eee;
 }
+
+/* ensure anchors inside sidebar never show underlines in any state */
+.sidebar-container a,
+.sidebar-container a:link,
+.sidebar-container a:visited,
+.sidebar-container a:hover,
+.sidebar-container a:active,
+.sidebar-container a:focus {
+  text-decoration: none;      /* remove underline */
+  
+  outline: none;              /* we'll add accessible focus below */
+}
+
+/* Sidebar item styling */
+.sidebar-item {
+  font-size: 16px;            /* fixed: use font-size not font */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #4a5568;
+  font-weight: 400;
+  transition: background 0.2s, color 0.2s;
+  margin: 6px;
+  border-radius: 8px;
+  text-decoration: none;      /* defensive */
+}
+
+/* visual active state */
+.sidebar-item.active {
+  background: rgb(247, 247, 247);
+  color: #051A36;
+  font-weight: 300;
+  box-shadow: -6px 0 0 0 #051A36 ;
+}
+
+/* keep icon color in sync with text */
+.sidebar-icon {
+  font-size: 18px;
+  color: inherit;
+}
+
+/* divider line */
+.sidebar-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 8px 16px;
+}
+

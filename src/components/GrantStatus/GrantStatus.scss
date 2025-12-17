@@ -1,0 +1,39 @@
+.grant-status-root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 16px 24px;
+  box-sizing: border-box;
+}
+
+.grant-status-root .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.grant-status-root table {
+  width: 100%;
+  table-layout: fixed; /* helps columns respect width and fill row */
+}
+.Grant-body{
+    height:600px;
+    overflow-y:auto;
+    overflow-x: auto;
+   
+}
+.Grant-Panel{
+    padding:20px;
+}
+.Grant-header{
+    display: flex;
+    justify-content: space-between;
+}
+.react-select__control {
+    font-size: 12px !important;
+}
+.Sp-GrantsUpdatestatus{
+  display:flex;
+  justify-content: space-between;
+ 
+
+}

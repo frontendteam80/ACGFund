@@ -1,0 +1,59 @@
+/* Select.scss - minimal styling so all selects look consistent */
+.util-select-root {
+  .react-select__control {
+    min-height: 35px !important;
+    border-radius: 6px;
+    padding-left: 2px;
+    width:250px;
+  }
+  .react-select__value-container {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .react-select__single-value {
+    line-height: 1.2;
+  }
+  .react-select__menu {
+    z-index: 9999; /* ensure menu overlays panels */
+  }
+}
+.react-select__control {
+  background: #f3f6fa !important;
+  border: 1px solid #dde6ee !important;
+  border-radius: 8px !important;
+  min-height: 34px !important;
+  // font-size: 12px !important;
+  box-shadow: none !important;
+  /* padding:0 14px !important; */
+  min-width:40px !important;
+  color:lab(2.75381% 0 0) !important;
+  
+}
+
+/* Change dropdown (popup menu) background and border radius */
+.react-select__menu {
+  background: #fdfdfd !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(239, 239, 239, 0.1);
+  border: 1px solid #dde6ee;
+  font-size: 12px !important;
+}
+
+/* Option styling */
+.react-select__option {
+  font-size: 1rem;
+  padding: 10px 14px;
+}
+
+/* Highlight selected/hovered option */
+.react-select__option--is-focused,
+.react-select__option--is-selected {
+   background-color: rgb(241, 241, 241) !important;
+   color:  #121212!important; 
+}
+.react-select__dropdown-indicator {
+  padding: 0 !important;
+}
+// .React-select_indicator{
+//   padding:0px !important;
+// }

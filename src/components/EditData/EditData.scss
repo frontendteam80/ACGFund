@@ -1,0 +1,153 @@
+/* src/components/EditData/EditData.scss */
+
+.pa-screen {
+  padding: 18px;
+  font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  min-height: 100vh;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.pa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pa-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.pa-tabs {
+  display: flex;
+  background: #e3e3e3;
+}
+
+.pa-tab {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+}
+
+.pa-tab.active {
+  background: #ffffff;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.02);
+  color: #2c3e50;
+}
+
+.pa-content {
+  margin-top: 10px;
+}
+
+/* Inline edit panel + form */
+
+.ops-modal-body {
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.ops-modal-error {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.ops-modal-grid-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+.ops-modal-grid-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ops-modal-item-label {
+  font-weight: 500;
+  font-family: 'Geist', Arial, sans-serif;
+  margin-bottom: 6px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.ops-modal-input {
+  width: 250px;
+  height: 28px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e6e9ee;
+  box-sizing: border-box;
+  font-size: 14px;
+  outline: none;
+  background-color: #fff;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.ops-modal-input--readonly,
+.ops-modal-input[readonly] {
+  background-color: #f7f7f8;
+  cursor: not-allowed;
+  color: #333;
+}
+
+.ops-modal-input:focus {
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 6px rgba(16, 24, 40, 0.06);
+}
+
+/* Buttons */
+
+.ops-btn {
+  min-width: 96px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.ops-btn-primary {
+  background: #051A39;
+  color: #ffffff;
+}
+
+.ops-btn-secondary {
+  background: #ffffff;
+  color: #001f4d;
+  border: 1px solid #001f4d;
+}
+
+.ops-btn-secondary:hover {
+  background: #f9fafb;
+}
+
+/* Responsive tweaks for labels/inputs inside slide panel */
+
+@media (max-width: 440px) {
+  .ops-modal-item-label {
+    font-size: 13px;
+  }
+
+  .ops-modal-input {
+    height: 34px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ops-modal-grid-row {
+    flex-direction: column;
+  }
+}
