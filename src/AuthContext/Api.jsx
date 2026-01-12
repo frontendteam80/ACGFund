@@ -270,6 +270,23 @@ export async function addAgent(agentObj, token) {
   return resp.body;
 }
 
+/* -------------------------Get roles for dropdown ------------------------- */ 
+export async function fetchRoles(token) {
+  const body = {
+    RequestParamType: "GetRoles",
+  };
+
+  try {
+    const resp = await postJson(BASE_SEARCH_URL, body, token);
+    // API returns array directly, or possibly wrapped
+    const rows = extractArray(resp.body, ["data", "Data", "Results", "Roles"]);
+    return Array.isArray(rows) ? rows : [];
+  } catch (err) {
+    console.error("[fetchRoles] error:", err);
+    return [];
+  }
+}
+
 /* ------------------------- Add / signup helpers ------------------------- */
 
 export async function addParticipant(participant, token) {
@@ -395,6 +412,38 @@ export function fetchParticipants(userId = null, token) {
 export function fetchAdvisors(userId = null, token) {
   return fetchList("GetAdvisors", userId, token);
 }
+/*-------------------------- Transfer of Agent -------------------------*/
+
+export async function transferParticipants(userId, token, payload) {
+  if (!userId) throw new Error("UserID is required for transferParticipants.");
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid transfer payload.");
+  }
+  if (!token) throw new Error("Authentication token is required.");
+
+  const {
+    fromAdvisor,     // AgentID
+    toAdvisor,       // AgentID
+    participantId,   // 0 or specific ParticipantID
+    endDate,         // yyyy-MM-dd
+    shareType,       // "funds" | "shares"
+  } = payload;
+
+  const body = {
+    RequestParamType: "AddAgentTransfers",
+    Data: {
+      SourceAgentID: Number(fromAdvisor),
+      DestinationAgentID: Number(toAdvisor),
+      ParticipantID: Number(participantId),               // 0 = all
+      Certainty: shareType === "shares" ? "S" : "D",      // funds=D, shares=S
+      EndDate: endDate,
+      CreatedByUserID: userId,
+    },
+  };
+
+  const resp = await postJson(DATA_ADD_URL, body, token);
+  return resp.body;
+}
 
 /* ------------------------- Generic addData for updates ------------------------- */
 
@@ -431,7 +480,7 @@ export async function fetchGrantStatus(userId, token) {
   const body = {
     RequestParamType: "GrantStatus",
     Filters: {
-      UserID: userId,   // ✅ REQUIRED
+      UserID: userId,  
     },
   };
 
@@ -450,6 +499,39 @@ export async function fetchGrantStatus(userId, token) {
   } catch (err) {
     console.error("[fetchGrantStatus] error:", err);
     return [];
+  }
+}
+
+export async function fetchStatements(pageNumber = 1, pageSize = 100, token = null) {
+  const url = `${BASE_URL}/statements?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+
+  try {
+    console.log("[fetchStatements] Request:", { url, pageNumber, pageSize });
+
+    const resp = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const parsed = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(`Statements API failed: ${resp.status}`);
+    }
+
+    
+    if (Array.isArray(parsed?.Results)) {
+      return parsed.Results;
+    }
+
+    console.warn("[fetchStatements] Unexpected response shape:", parsed);
+    return [];
+  } catch (err) {
+    console.error("[fetchStatements] error:", err);
+    throw err;
   }
 }
 
@@ -549,6 +631,135 @@ export async function checkEmailExists(email, token = null) {
         .toLowerCase() === lower
   );
 }
+
+//  Validate participantId ↔ email using Users API
+export async function validateParticipantEmail(participantId, email, token = null) {
+  if (!participantId || !email) return false;
+
+  const url = `${BASE_URL}/users?PageNumber=1&PageSize=100`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to validate participant email");
+  }
+
+  const data = await res.json();
+  const users = extractArray(data, ["data", "Results"]);
+
+  return users.some(
+    (u) =>
+      String(u.ParticipantId) === String(participantId) &&
+      (u.Email || u.EmailAddress || "")
+        .toLowerCase()
+        .trim() === email.toLowerCase().trim()
+  );
+}
+/* ------------------------- Admin User IDs ------------------------- */
+export async function fetchAdminUserIds(token) {
+  const body = {
+    RequestParamType: "GetAPIAdminAccessForUserNames",
+  };
+
+  try {
+    const resp = await postJson(BASE_SEARCH_URL, body, token);
+    // API returns array directly
+    return extractArray(resp.body, ["data", "Results"]);
+  } catch (err) {
+    console.error("[fetchAdminUserIds] error:", err);
+    return [];
+  }
+}
+/*-------------------------Fetch ExistingCustom Reports -----------------------------------*/
+export async function fetchCustomReportswithusers(token) {
+  const body = {
+    RequestParamType: "GetCustomReportsWithusers",
+  };
+
+  try {
+    const resp = await postJson(BASE_SEARCH_URL, body, token);
+    // API returns array directly
+    return extractArray(resp.body, ["data", "Results"]);
+  } catch (err) {
+    console.error("[fetchAdminUserIds] error:", err);
+    return [];
+  }
+}
+/*-------------------------Fetch Existing Requestparameters -----------------------------------*/
+export async function fetchRequestParameters(token) {
+  const body = {
+    RequestParamType: "GetSpRequestParameters",
+  };
+
+  try {
+    const resp = await postJson(BASE_SEARCH_URL, body, token);
+    // API returns array directly
+    return extractArray(resp.body, ["data", "Results"]);
+  } catch (err) {
+    console.error("[fetchAdminUserIds] error:", err);
+    return [];
+  }
+}
+/* ------------------------- Update RequestParamtype ------------------------- */
+export async function updateRequestParameter(paramPayload, token) {
+  if (!paramPayload || typeof paramPayload !== "object") {
+    throw new Error("Invalid request parameter payload.");
+  }
+  if (!token) {
+    throw new Error("Authentication token is required.");
+  }
+
+  const body = {
+    RequestParamType: "UpdateSpRequestParameter",
+    Data: paramPayload,
+  };
+
+  const resp = await postJson(DATA_ADD_URL, body, token);
+  return resp.body;
+}
+
+/* ------------------------- Add Custom Report With Users ------------------------- */
+export async function addCustomReportWithUsers(reportPayload, token) {
+  if (!reportPayload || typeof reportPayload !== "object") {
+    throw new Error("Invalid custom report payload.");
+  }
+  if (!token) {
+    throw new Error("Authentication token is required.");
+  }
+
+  const body = {
+    RequestParamType: "AddCustomReportWithUsers",
+    Data: reportPayload,
+  };
+
+  const resp = await postJson(DATA_ADD_URL, body, token);
+  return resp.body;
+}
+
+/* ------------------------- Add RequestParameter ------------------------- */
+export async function addRequestParameter(paramPayload, token) {
+  if (!paramPayload || typeof paramPayload !== "object") {
+    throw new Error("Invalid request parameter payload.");
+  }
+  if (!token) {
+    throw new Error("Authentication token is required.");
+  }
+
+  const body = {
+    RequestParamType: "AddRequestParameter",
+    Data: paramPayload,
+  };
+
+  const resp = await postJson(DATA_ADD_URL, body, token);
+  return resp.body;
+}
+
 /* ------------------------- Exports ------------------------- */
 
 const api = {
@@ -562,9 +773,14 @@ const api = {
   fetchGrantStatus,
   fetchContributionStatus, 
   fetchAdvisors,
+  fetchAdminUserIds,
+  fetchCustomReportswithusers,
+  fetchRequestParameters,
   addAgent,
   addParticipant,
   addFundPrice,
+  addRequestParameter,
+  addCustomReportWithUsers,
   fetchFunds,
   fetchUserParticipantDetails,
   signupUser,
@@ -573,7 +789,12 @@ const api = {
   updateUserPassword,
   checkEmailExists,
   updateGrantStatus,
-  updateContributionStatus, 
+  updateContributionStatus,
+  updateRequestParameter,
+  transferParticipants,
+  fetchRoles,
+  fetchStatements,
+  validateParticipantEmail, 
 };
 
 export default api;

@@ -1,9 +1,11 @@
-// src/components/Utilites/Select/Select.jsx
+
+
+// src/components/Utilites/DropDown/DropDown.jsx (SelectDropDown)
+
 import React from "react";
 import PropTypes from "prop-types";
 import ReactSelect from "react-select";
 import "./DropDown.scss";
-
 
 export default function SelectDropDown({
   options = [],
@@ -16,15 +18,35 @@ export default function SelectDropDown({
   classNamePrefix = "react-select",
   getOptionLabel,
   getOptionValue,
-  styles,
+  styles: customStyles,
   menuPlacement = "auto",
   noOptionsMessage = () => "No options",
+  ...rest
 }) {
-  // If consumer provided a primitive value (string/number), normalize to option object for react-select
-  const normalizedValue =
-    value && (typeof value === "string" || typeof value === "number")
-      ? options.find((o) => (o.value ?? o.id ?? o.key) === value) || null
-      : value || null;
+  const isMulti = !!rest.isMulti;   // detect multi-select
+
+  let normalizedValue;
+  if (isMulti) {
+    // multi-select: react-select expects array
+    normalizedValue = Array.isArray(value) ? value : [];
+  } else if (value && (typeof value === "string" || typeof value === "number")) {
+    // single: allow primitive ids
+    normalizedValue =
+      options.find((o) => (o.value ?? o.id ?? o.key) === value) || null;
+  } else {
+    normalizedValue = value || null;
+  }
+
+  const baseStyles = {
+    dropdownIndicator: (base) => ({ ...base, padding: 5 }),
+    clearIndicator: (base) => ({ ...base, padding: 0 }),
+    indicatorsContainer: (base) => ({ ...base, padding: 0 }),
+  };
+
+  const mergedStyles = {
+    ...baseStyles,
+    ...(customStyles || {}),
+  };
 
   return (
     <div className={`util-select-root ${className}`}>
@@ -38,14 +60,10 @@ export default function SelectDropDown({
         classNamePrefix={classNamePrefix}
         getOptionLabel={getOptionLabel}
         getOptionValue={getOptionValue}
-        
         menuPlacement={menuPlacement}
         noOptionsMessage={noOptionsMessage}
-        styles={{
-                  dropdownIndicator: (base) => ({ ...base, padding: 5 }),
-                  clearIndicator: (base) => ({ ...base, padding: 0 }),
-                  indicatorsContainer: (base) => ({ ...base, padding: 0 }),
-                }}
+        styles={mergedStyles}
+        {...rest}     // forwards isMulti, components, closeMenuOnSelect, etc.
       />
     </div>
   );

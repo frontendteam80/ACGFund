@@ -1,0 +1,226 @@
+ 
+
+@import url('https://fonts.googleapis.com/css2?family=Geist&display=swap');
+
+body {
+  font-family: 'Geist', Arial, sans-serif;
+}
+
+/* Table container */
+.table-container {
+  width: 100%;
+  padding: 8px 0;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* Main table */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-family: 'Geist', Arial, sans-serif;
+  font-size: 12px;
+  min-width: 700px;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.custom-table th {
+  background: #f5f7fb;
+  font-weight: 600;
+  color: #051a36;
+  border-bottom: 2px solid #e7eaf3;
+}
+
+.custom-table tbody tr {
+  border-top: 1px solid #e7eaf3;
+}
+
+.custom-table tbody tr:hover {
+  background: #f0f6fd;
+}
+
+/* Alignment classes */
+.col-center {
+  text-align: left !important;
+}
+
+.col-right {
+  text-align: right !important;
+}
+
+/* Details button */
+.details-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter headers */
+.filterable-header {
+  position: relative;
+}
+
+.table-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.header-label {
+  font-weight: 500;
+  font-size: 13px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-toggle-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.2s ease;
+  color: #a0a7b3;
+}
+
+.filter-toggle-btn:hover {
+  background: #f1f5f9;
+}
+
+.filter-toggle-btn.active {
+  color: #051a36;
+}
+
+/* Filter dropdown */
+.table-filter-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  margin-top: 4px;
+  max-height: 250px;
+}
+
+/* React Select - Control */
+.table-filter-select__control {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  min-height: 32px;
+  font-size: 12px;
+  font-family: "Geist", Arial, sans-serif;
+  font-weight: 500;
+}
+
+.table-filter-select__control:hover,
+.table-filter-select__control--is-focused {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.table-filter-select__indicator-separator {
+  display: none;
+}
+
+.table-filter-select__dropdown-indicator:hover {
+  background: transparent !important;
+}
+
+/* React Select - Text */
+.table-filter-select__placeholder {
+  font-size: 12px;
+  font-family: "Geist", Arial, sans-serif;
+  font-weight: 500;
+  color: #ededee;
+}
+
+.table-filter-select__multi-value__label {
+  font-size: 12px;
+  font-family: "Geist", Arial, sans-serif;
+  font-weight: 500;
+}
+
+/* React Select - Menu */
+.table-filter-select__menu {
+  z-index: 9999;
+  font-size: 12px;
+  font-family: "Geist", Arial, sans-serif;
+  font-weight: 500;
+}
+
+.table-filter-select__option {
+  font-size: 12px;
+  font-family: "Geist", Arial, sans-serif;
+  font-weight: 500;
+  white-space: normal;
+}
+
+.table-filter-select__option--is-focused {
+  background-color: #f5f7fb;
+}
+
+.table-filter-select__option--is-selected {
+  background-color: #edf2ff;
+  color: #051a36;
+}
+
+.table-filter-select__menu-list {
+  max-height: 230px;
+  overflow-y: auto;
+  padding-bottom: 48px;
+}
+
+/* Filter footer */
+.filter-menu-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  z-index: 1;
+}
+
+.filter-menu-footer .filter-clear-btn,
+.filter-menu-footer .filter-done-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-menu-footer .filter-clear-btn {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #051a36;
+}
+
+.filter-menu-footer .filter-done-btn {
+  border: none;
+  background: #051a39;
+  color: #fff;
+}

@@ -1,49 +1,81 @@
-/* message box base */
-.process-msg {
-  font-size: 15px;
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-weight: 500;
-//   box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+
+@import "../Utilites/Styles/layout.scss";
+@import "../Utilites/Styles/controls.scss";
+@import "../Utilites/Styles/table-sidebar.scss";
+@import "../Utilites/Styles/message.scss";
+
+/* ProcessData‑specific layout tweaks */
+// .processdata-filters-row {
+//   // padding: 12px 32px;
+// }
+.ProcessData-container{
+flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7f8fa;
+  min-height: calc(100vh - 64px);
+  overflow-x: hidden;
 }
 
-/* success (green) */
-.process-success {
-
-  color: #16a34a;
+.processdata-filters-left {
+  gap: 14px;
 }
 
-/* error (red) */
-.process-error {
-
-  color: #e85757;
+.processdata-select {
+  min-width: 260px;
 }
 
-/* user message meta */
-.user-msg {
-  background-color: #eef2ff;
-  border-left: 4px solid #4f46e5;
-  color: #3730a3;
+.processdata-date-wrapper {
+  min-width: 140px;
 }
 
-/* server status meta */
-.server-status {
-  background-color: #f8fafc;
-  border-left: 4px solid #0ea5e9;
-  color: #0f172a;
+.processdata-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
 }
 
-/* card spacing */
-.maincontent-card {
-  border-radius: 12px;
+.processdata-card {
+  position: relative;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(22, 28, 37, 0.06);
+  border-radius: 16px;
+  // box-shadow: 0 8px 24px rgba(22, 28, 37, 0.06);
+  width: 92%;
+  max-width: 1280px;
+  padding: 36px 32px 32px 32px;
+  display: flex;
+  flex-direction: column;
+}
+.Processdata-filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 97%;
+  max-width: 1280px;
+//   margin: 20px 0 12px 0;
+    padding-bottom: 12px;
+  background: none;
 }
 
-/* empty state */
-.maincontent-empty {
+
+.processdata-results-header {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* Override details sidebar width for this page */
+.processdata-sidebar {
+  width: 520px;
+}
+.processdata-sidebar-content {
+  max-height: calc(100vh - 120px);
+}
+.processdata-details-table {
+  width: 100%;
+}
+.processdata-sidebar-empty {
   color: #6b7280;
-  padding: 16px;
-  text-align: left;
 }

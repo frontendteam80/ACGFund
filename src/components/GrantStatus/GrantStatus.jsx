@@ -4,6 +4,7 @@ import React, {useEffect,useMemo,useState,useCallback,} from "react";
 import api from "../../AuthContext/Api.jsx";
 import { useAuth } from "../../AuthContext/AuthContext.jsx";
 import Table from "../Utilites/Table/Table.jsx";
+import Loader from "../Utilites/Loader/Loader.jsx";
 import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
 import SlidePanel from "../Utilites/SlidePanel/SlidePanel.jsx";
 import DetailsContent from "../Utilites/SlidePanel/DetailsContent.jsx";
@@ -24,8 +25,15 @@ export default function GrantStatus({ userId }) {
   const [editRow, setEditRow] = useState(null);
   const [editStatus, setEditStatus] = useState("");
   const [editStatusDetails, setEditStatusDetails] = useState("");
+  const [processMessage, setProcessMessage] = useState("");
+  const [processCode, setProcessCode] = useState(null);
 
   // BULK update dropdown state (header)
+  const ShowAlert =(type,message)=> {
+    setProcessCode(type === "success" ? 0 : 1);
+    setProcessMessage(message);
+    setTimeout(() =>SpeechRecognitionAlternative({type:"",message:""}),4000);
+  }
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkStatusDetails, setBulkStatusDetails] = useState("");
 
@@ -52,10 +60,12 @@ export default function GrantStatus({ userId }) {
     if (!search) return rows;
     const q = search.toLowerCase();
     return rows.filter((r) => {
+      const grantId = String(r.WWWGrantID || "").toLowerCase();
       const name = String(r.ParticipantName || "").toLowerCase();
       const charity = String(r.Charity || "").toLowerCase();
       const status = String(r.GrantStatus || "").toLowerCase();
       return (
+         grantId.includes(q) ||
         name.includes(q) ||
         charity.includes(q) ||
         status.includes(q)
@@ -116,7 +126,7 @@ export default function GrantStatus({ userId }) {
     WWWGrantID: "center",
   };
 
-  // optional approve (if still used anywhere)
+ 
   const handleApproveGrants = async () => {
     if (selectedGrantIds.length === 0 || !token) return;
 
@@ -139,35 +149,43 @@ export default function GrantStatus({ userId }) {
 
   // BULK update status + status details
   const handleBulkUpdate = async () => {
-    if (selectedGrantIds.length === 0 || !token) return;
-    if (!bulkStatus && !bulkStatusDetails) return; // nothing to update
+  if (selectedGrantIds.length === 0 || !token) return;
+  if (!bulkStatus && !bulkStatusDetails) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      await Promise.all(
-        selectedGrantIds.map((grantId) =>
-          api.updateGrantStatus(
-            grantId,
-            {
-              ...(bulkStatus && { GrantStatus: bulkStatus }),
-              ...(bulkStatusDetails && { GrantStatusDetails: bulkStatusDetails }),
-            },
-            token
-          )
+    await Promise.all(
+      selectedGrantIds.map((grantId) =>
+        api.updateGrantStatus(
+          grantId,
+          {
+            ...(bulkStatus && { GrantStatus: bulkStatus }),
+            ...(bulkStatusDetails && {
+              GrantStatusDetails: bulkStatusDetails,
+            }),
+          },
+          token
         )
-      );
+      )
+    );
 
-      const data = await api.fetchGrantStatus(userId, token);
-      setRows(Array.isArray(data) ? data : []);
-      // keep selection or clear depending on preference
-      // setSelectedGrantIds([]);
-    } catch (err) {
-      console.error("Error bulk updating grants:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    
+    ShowAlert(
+      "success",
+      `Successfully updated ${selectedGrantIds.length} grants`
+    );
+
+    const data = await api.fetchGrantStatus(userId, token);
+    setRows(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Bulk update error:", err);
+    ShowAlert("error", "Failed to update selected grants");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // details slide panel handlers
   const openDetails = useCallback((row) => {
@@ -182,6 +200,8 @@ export default function GrantStatus({ userId }) {
 
   // edit slide panel handlers
   const openEdit = useCallback((row) => {
+    setProcessMessage("");
+  setProcessCode(null);
     setEditRow(row);
     setEditStatus(row.GrantStatus || "");
     setEditStatusDetails(row.GrantStatusDetails || "");
@@ -202,7 +222,7 @@ export default function GrantStatus({ userId }) {
 
       try {
         setLoading(true);
-        await api.updateGrantStatus(
+       const resp = await api.updateGrantStatus(
           editRow.WWWGrantID,
           {
             GrantStatus: editStatus,
@@ -210,20 +230,52 @@ export default function GrantStatus({ userId }) {
           },
           token
         );
+        setProcessCode(resp?.ProcessCode);
+        setProcessMessage(
+        resp?.ProcessMessage || "Grant updated successfully"
+      );
+      setProcessCode(resp?.ProcessCode);
+
+      if (resp?.ProcessCode === 0) {
+       
         const data = await api.fetchGrantStatus(userId, token);
         setRows(Array.isArray(data) ? data : []);
-        closeEdit();
-      } catch (err) {
-        console.error("Error updating grant:", err);
-      } finally {
-        setLoading(false);
+
+        closeEdit(); // close slide panel only on success
       }
-    },
+    } catch (err) {
+      console.error("Error updating grant:", err);
+      setProcessCode(400||500);
+      setProcessMessage("Failed to update grant");
+      
+    } finally {
+      setLoading(false);
+    }
+  },
     [editRow, editStatus, editStatusDetails, token, userId, closeEdit]
   );
 
   return (
+
     <div className="Grant-Panel">
+      {processMessage && (
+  <div
+    style={{
+      marginBottom: 12,
+      padding: "8px 12px",
+      borderRadius: 6,
+      fontSize: 14,
+      color: processCode === 0 ? "#166534" : "#b91c1c",
+      backgroundColor: processCode === 0 ? "#dcfce7" : "#fee2e2",
+      border: `1px solid ${
+        processCode === 0 ? "#86efac" : "#fecaca"
+      }`,
+    }}
+  >
+    {processMessage}
+  </div>
+)}
+  <div className="MainContent-card">
       <div className="Grant-header">
         <h3>Grant Status</h3>
 
@@ -256,7 +308,7 @@ export default function GrantStatus({ userId }) {
                   }}
                 >
                   <option value="">InProcess</option>
-                  <option value="Checkissued">CheckIssued</option>
+                  <option value="CheckIssued">CheckIssued</option>
                   <option value="CheckCashed">CheckCashed</option>
                 </select>
 
@@ -270,8 +322,8 @@ export default function GrantStatus({ userId }) {
                   }}
                 >
                   <option value="">Status Details</option>
-                  <option value="Cash Settled">Cash Settled</option>
-                  <option value="Cash Received">Cash Received</option>
+                  <option value="Cash Settled">CashSettled</option>
+                  <option value="Cash Received">CashReceived</option>
                 </select>
 
                 <button
@@ -301,7 +353,7 @@ export default function GrantStatus({ userId }) {
 
       <div className="Grant-body">
         {loading ? (
-          <div className="loader-wrap">Loading grants...</div>
+          <Loader text="Loading grants..." size={40} />
         ) : (
           <>
             <Table
@@ -485,7 +537,7 @@ export default function GrantStatus({ userId }) {
                 }}
               >
                 <option value="">InProcess</option>
-                <option value="Checkissued">CheckIssued</option>
+                <option value="CheckIssued">CheckIssued</option>
                 <option value="CheckCashed">CheckCashed</option>
               </select>
             </div>
@@ -513,7 +565,8 @@ export default function GrantStatus({ userId }) {
                   border: "1px solid #e0e2e4ff",
                 }}
               >
-                <option value="">Select status detail</option>
+                <option value="">	Acknowledged</option>
+                
                 <option value="Cash Settled">CashSettled</option>
                 <option value="Cash Received">CashReceived</option>
               </select>
@@ -560,6 +613,7 @@ export default function GrantStatus({ userId }) {
           </form>
         )}
       </SlidePanel>
+    </div>
     </div>
   );
 }

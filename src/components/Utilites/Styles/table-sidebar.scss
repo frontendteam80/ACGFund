@@ -1,0 +1,110 @@
+// /* table-and-sidebar.css */
+
+// /* Table container */
+// .table-container {
+//   width: 100%;
+//   padding: 8px 0;
+//   overflow-x: auto;
+// }
+
+// .custom-table {
+//   width: 100%;
+//   border-collapse: collapse;
+//   font-family: "Geist", Arial, sans-serif;
+//   font-size: 12px;
+//   background: white;
+//   min-width: 700px;
+// }
+
+// .custom-table th,
+// .custom-table td {
+//   padding: 16px;
+//   text-align: left;
+//   vertical-align: middle;
+// }
+
+// .custom-table th {
+//   background: #f5f7fb;
+//   font-weight: 600;
+//   color: #051a36;
+//   border-bottom: 2px solid #e7eaf3;
+// }
+
+// .custom-table tbody tr {
+//   border-top: 1px solid #e7eaf3;
+// }
+
+// .custom-table tbody tr:hover {
+//   background: #f0f6fd;
+// }
+
+// /* "Details" button in table */
+// .details-btn {
+//   background: none;
+//   border: none;
+//   cursor: pointer;
+//   padding: 4px 8px;
+// }
+
+// /* Slide-in sidebar */
+// .details-sidebar {
+//   position: fixed;
+//   top: 0;
+//   right: -400px;
+//   width: 520px; /* default width; override per-page if needed */
+//   height: 100%;
+//   background: #fff;
+//   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+//   padding: 24px;
+//   box-sizing: border-box;
+//   transition: right 0.3s ease-in-out;
+//   z-index: 1050;
+//   font-family: "Geist", Arial, sans-serif;
+// }
+
+// .details-sidebar.open {
+//   right: 0;
+// }
+
+// /* Sidebar header */
+// .sidebar-header {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   margin-bottom: 1rem;
+// }
+
+// .sidebar-close-btn {
+//   font-size: 24px;
+//   border: none;
+//   background: none;
+//   cursor: pointer;
+//   line-height: 1;
+//   color: #486488;
+//   font-weight: 700;
+// }
+
+// /* Sidebar content scroll */
+// .sidebar-content {
+//   max-height: calc(100vh - 120px);
+//   overflow-y: auto;
+// }
+
+// /* Table inside sidebar */
+// .details-modal-table {
+//   width: 100%;
+// }
+
+// .details-modal-table th,
+// .details-modal-table td {
+//   padding: 8px 12px;
+//   border-bottom: 1px solid #e7eaf3;
+//   vertical-align: top;
+// }
+
+// .details-modal-table th {
+//   text-align: left;
+//   width: 35%;
+//   background: #f5f7fb;
+//   font-weight: 600;
+// }

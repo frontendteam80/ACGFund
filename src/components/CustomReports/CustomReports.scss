@@ -1,0 +1,42 @@
+
+
+@import "../Utilites/Styles/layout.scss";
+@import "../Utilites/Styles/controls.scss";
+@import "../Utilites/Styles/table-sidebar.scss";
+@import "../Utilites/Styles/message.scss";
+
+/* Any CustomReports‑only classes here, e.g. */
+.report-table-wrapper {
+  position: relative;
+}
+
+/* Column filter summary under table */
+.filter-summary {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-summary-list {
+  display: flex;
+  flex-direction: row;
+  gap:10px;
+  margin: 0;
+  padding-left: 18px;
+  list-style: none;
+}
+
+.filter-summary-clear-btn {
+  padding: 4px 12px;
+  color: #051a39;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  background: transparent;
+}
+

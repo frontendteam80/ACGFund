@@ -1,0 +1,48 @@
+@import "../Utilites/Styles/typography.scss";
+.pa-tabs { display: flex; background: #f0f0f0; }
+.pa-tab { background: #f0f0f0; padding: 8px 12px; }
+.pa-tab.active { background: #fff; color: #051A39; }
+
+.Tabs-SearchRow{
+display:flex;
+justify-content: space-between;
+}
+.reports-root {
+  padding: 24px;
+  max-width: 1400px;
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size);
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reports-title {
+  font-weight: 600;
+}
+
+.reports-filters {
+  display: flex;
+  gap: 12px;
+//   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.Search-filters{
+    display:flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.reports-year-select{
+    width:100px;
+    height: 32px;
+    padding:5px;
+    border-radius: 6px;
+}
+.Report-export{
+    height:32px;
+}
+

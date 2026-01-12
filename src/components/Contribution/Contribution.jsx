@@ -1,13 +1,9 @@
 // src/components/Operations/ContributionStatus.jsx
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-} from "react";
+import React, { useEffect, useMemo,useState,useCallback,} from "react";
 import api from "../../AuthContext/Api.jsx";
 import { useAuth } from "../../AuthContext/AuthContext.jsx";
 import Table from "../Utilites/Table/Table.jsx";
+import Loader from "../Utilites/Loader/Loader.jsx"; // adjust path if needed
 import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
 import SlidePanel from "../Utilites/SlidePanel/SlidePanel.jsx";
 import DetailsContent from "../Utilites/SlidePanel/DetailsContent.jsx";
@@ -29,7 +25,9 @@ export default function ContributionStatus({ userId }) {
   const [editStatus, setEditStatus] = useState("");
   const [editStatusDetails, setEditStatusDetails] = useState("");
 
-  // BULK update dropdown state (header)
+  const [processMessage, setProcessMessage] = useState("");
+  const [processCode, setProcessCode] = useState(null);
+
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkStatusDetails, setBulkStatusDetails] = useState("");
 
@@ -56,10 +54,12 @@ export default function ContributionStatus({ userId }) {
     if (!search) return rows;
     const q = search.toLowerCase();
     return rows.filter((r) => {
+      const contributionId = String(r.WWWContributionID || "").toLowerCase();
       const name = String(r.ParticipantName || "").toLowerCase();
       const status = String(r.ContributionStatus || "").toLowerCase();
       const fund = String(r.ParticipantNumber || "").toLowerCase();
       return (
+        contributionId.includes(q) ||
         name.includes(q) ||
         status.includes(q) ||
         fund.includes(q)
@@ -122,36 +122,53 @@ export default function ContributionStatus({ userId }) {
   };
 
   // BULK update status + status details
-  const handleBulkUpdate = async () => {
-    if (selectedIds.length === 0 || !token) return;
-    if (!bulkStatus && !bulkStatusDetails) return;
+ const handleBulkUpdate = async () => {
+  if (selectedIds.length === 0 || !token) return;
+  if (!bulkStatus && !bulkStatusDetails) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
+    setProcessMessage("");
+    setProcessCode(null);
 
-      await Promise.all(
-        selectedIds.map((id) =>
-          api.updateContributionStatus(
-            id,
-            {
-              ...(bulkStatus && { ContributionStatus: bulkStatus }),
-              ...(bulkStatusDetails && {
-                ContributionStatusDetails: bulkStatusDetails,
-              }),
-            },
-            token
-          )
+    
+    await Promise.all(
+      selectedIds.map((id) =>
+        api.updateContributionStatus(
+          id,
+          {
+            ...(bulkStatus && { ContributionStatus: bulkStatus }),
+            ...(bulkStatusDetails && {
+              ContributionStatusDetails: bulkStatusDetails,
+            }),
+          },
+          token
         )
-      );
+      )
+    );
 
-      const data = await api.fetchContributionStatus(userId, token);
-      setRows(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Error bulk updating contributions:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setProcessCode(0);
+    setProcessMessage(
+      `Successfully updated ${selectedIds.length} contributions`
+    );
+
+    const data = await api.fetchContributionStatus(userId, token);
+    setRows(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Bulk update error:", err);
+    setProcessCode(400||500);
+    setProcessMessage("Failed to update selected contributions.");
+  } finally {
+    setLoading(false);
+
+    setTimeout(() => {
+      setProcessCode(null);
+      setProcessMessage("");
+    }, 4000);
+  }
+};
+
+
 
   // details slide panel handlers
   const openDetails = useCallback((row) => {
@@ -178,36 +195,75 @@ export default function ContributionStatus({ userId }) {
     setEditStatus("");
     setEditStatusDetails("");
   }, []);
+  const showAlert = (type, message) => {
+  setAlert({ type, message });
+  setTimeout(() => setAlert({ type: "", message: "" }), 4000);
+};
+
 
   const handleSaveEdit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!editRow || !token) return;
+  async (e) => {
+    e.preventDefault();
+    if (!editRow || !token) return;
 
-      try {
-        setLoading(true);
-        await api.updateContributionStatus(
-          editRow.WWWContributionID,
-          {
-            ContributionStatus: editStatus,
-            ContributionStatusDetails: editStatusDetails,
-          },
-          token
-        );
+    try {
+      setLoading(true);
+      const resp = await api.updateContributionStatus(
+        editRow.WWWContributionID,
+        {
+          ContributionStatus: editStatus,
+          ContributionStatusDetails: editStatusDetails,
+        },
+        token
+      );
+      setProcessCode(resp?.ProcessCode);
+      setProcessMessage(
+        resp?.ProcessMessage ||"Contribution Update Successfully"
+      );
+      setProcessCode(resp?.ProcessCode);
+      // const code = respBody?.ProcessCode;
+      // const msg = respBody?.processMessage || "Unknown response.";
+
+      if (resp?.Processcode === 0) {
+        // showAlert("success", msg);
         const data = await api.fetchContributionStatus(userId, token);
         setRows(Array.isArray(data) ? data : []);
         closeEdit();
-      } catch (err) {
-        console.error("Error updating contribution:", err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [editRow, editStatus, editStatusDetails, token, userId, closeEdit]
-  );
+      } 
+      // else {
+      //   showAlert("error", msg);
+      // }
+    } catch (err) {
+      // console.error("Error updating contribution:", err);
+      // showAlert("error", "Unexpected error while updating contribution.");
+      setProcessCode(400||500);
+      setProcessMessage("Failed to update grant");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [editRow, editStatus, editStatusDetails, token, userId, closeEdit]
+);
 
   return (
     <div className="Contribution-Panel">
+      {processmessage && (
+    <div
+      style={{
+        marginBottom: 12,
+        padding: "8px 12px",
+        borderRadius: 6,
+        fontSize: 14,
+        color: alert.type === "success" ? "#166534" : "#b91c1c",
+        backgroundColor: alert.type === "success" ? "#238947ff" : "#fee2e2",
+        border: `1px solid ${
+          alert.type === "success" ? "#238947ff" : "#fecaca"
+        }`,
+      }}
+    >
+      {processMessage}
+    </div>
+  )}
       <div className="Contribution-header">
         <h3>Contribution Status</h3>
 
@@ -237,7 +293,7 @@ export default function ContributionStatus({ userId }) {
                   border: "1px solid #e0e2e4ff",
                 }}
               >
-                <option value="">Contribution Status</option>
+                {/* <option value="">Contribution Status</option> */}
                 <option value="InProcess">InProcess</option>
                 <option value="Posted">Posted</option>
                 <option value="Reversed">Reversed</option>
@@ -252,9 +308,9 @@ export default function ContributionStatus({ userId }) {
                   border: "1px solid #e0e2e4ff",
                 }}
               >
-                <option value="">Status Details</option>
-                <option value="Cash Settled">Cash Settled</option>
-                <option value="Cash Received">Cash Received</option>
+                {/* <option value="">Status Details</option> */}
+                <option value="Cash Settled">CashSettled</option>
+                <option value="Cash Received">CashReceived</option>
               </select>
 
               <button
@@ -283,7 +339,7 @@ export default function ContributionStatus({ userId }) {
 
       <div className="Contribution-body">
         {loading ? (
-          <div className="loader-wrap">Loading contributions...</div>
+          <Loader text="Loading contributions..." size={40} />
         ) : (
           <>
             <Table
@@ -473,9 +529,9 @@ export default function ContributionStatus({ userId }) {
                   fontSize:14,
                 }}
               >
-                <option value="">Select status</option>
-                <option value="InProcess">InProcess</option>
-                <option value="Posted">Checkreceived</option>
+                <option value="">InProcess</option>
+                {/* <option value="">Select status</option> */}
+                <option value="Posted">CheckReceived</option>
                 <option value="Reversed">CheckCashed</option>
               </select>
             </div>
@@ -503,7 +559,8 @@ export default function ContributionStatus({ userId }) {
                   fontSize:14,
                 }}
               >
-                <option value="">InProcess</option>
+                {/* <option value="">InProcess</option> */}
+                <option value="">Select status</option>
                 <option value="Cash Settled">CashSent</option>
                 <option value="Cash Received">CashReconciled</option>
               </select>

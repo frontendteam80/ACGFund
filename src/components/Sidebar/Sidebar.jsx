@@ -1,20 +1,21 @@
 
-
 // Sidebar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart2, Layers3, ChartNoAxesCombined, FilePlus,FilePen,Coins, ShieldUser } from 'lucide-react';
-import './Sidebar.css';
+import { BarChart2, Layers3, ChartNoAxesCombined, FilePlus, FilePen, Coins, ShieldUser,ReceiptText ,Receipt,DatabaseZap} from 'lucide-react';
+import './Sidebar.scss';
 
-const sidebarItems = [
-  { label: 'Custom Reports', path: '/dashboard/custom-reports', icon: <BarChart2 size={20} /> },
-  { label: 'Process Data', path: '/dashboard/process-data', icon: <Layers3 size={20} /> },
-  { label: 'Fund Price', path: '/dashboard/fund-price', icon: <ChartNoAxesCombined size={20} /> },
-  { label: 'Add Data', path: '/dashboard/add-data', icon: <FilePlus size={20} /> },
-  { label: 'Edit Data', path: '/dashboard/edit-data', icon: <FilePen size={20} /> },
-  { label: 'Operations', path: '/dashboard/operationscreen', icon: <Coins size={20} /> },
-  { label: 'Update Password', path: '/dashboard/UpdatePassword', icon: < ShieldUser size={20} /> },
-
+export const sidebarItems = [
+  { label: 'Custom Reports', path: '/customreports', icon: <BarChart2 size={20} /> },
+  { label: 'Process Data', path: '/processdata', icon: <Layers3 size={20} /> },
+  { label: 'Fund Price', path: '/fundprice', icon: <ChartNoAxesCombined size={20} /> },
+  { label: 'Add Data', path: '/adddata', icon: <FilePlus size={20} /> },
+  { label: 'Edit Data', path: '/editdata', icon: <FilePen size={20} /> },
+  { label: 'Operations', path: '/operations', icon: <Coins size={20} /> },
+  { label: 'Update Password', path: '/updatepassword', icon: <ShieldUser size={20} /> },
+  { label: 'Reports', path: '/reports', icon: <Receipt size={20} /> },
+  { label: 'Letters', path: '/Letters', icon: <ReceiptText size={20} /> },
+  { label: 'Data Mapping', path: '/dataMapping', icon: <DatabaseZap size={20} /> },
 ];
 
 const Sidebar = () => {
@@ -22,8 +23,6 @@ const Sidebar = () => {
     <aside className="sidebar-container">
       {sidebarItems.map(item => (
         <React.Fragment key={item.label}>
-          
-          {/* CLICK → Navigate (NavLink handles active highlight) */}
           <NavLink
             to={item.path}
             className={({ isActive }) =>
@@ -34,7 +33,6 @@ const Sidebar = () => {
             {item.label}
           </NavLink>
 
-          {/* Divider after Fund Price */}
           {item.label === 'Fund Price' && <div className="sidebar-divider" />}
         </React.Fragment>
       ))}

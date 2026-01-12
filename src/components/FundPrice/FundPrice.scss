@@ -5,7 +5,25 @@
   align-items: flex-start;
   width: 100%;
   box-sizing: border-box;
-  margin-left: 30px;
+  margin-left: 40px;
+  padding-left:5px;
+
+}
+.FundPrice-title-row{
+  width: 100%;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.FundPrice-container{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7f8fa;
+  min-height: calc(100vh - 64px);
+  overflow-x: hidden;
 }
 
 /* form column on the left */
@@ -13,7 +31,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px 8px;
+  padding: 0 8px 8px 0;
   width: 600px;
   box-sizing: border-box;
   flex: 0 0 520px;
@@ -130,9 +148,9 @@
 }
 
 /* messages under form */
-.fundprice-messages {
-  margin-top: 6px;
-}
+// .fundprice-messages {
+//   margin-top: 6px;
+// }
 
 /* responsive: stack the label & input on narrow screens */
 @media (max-width: 900px) {
@@ -179,6 +197,8 @@
   font-family: 'Geist', Arial, sans-serif !important;
   font-size: 13px !important;
   color: hsl(0, 0%, 20%) !important;
+min-height:20px !important;
+  padding:2px !important;
 }
 
 .fundprice-select .react-select__single-value {
@@ -261,6 +281,7 @@
 
 /* keep modal above table/tooling */
 .maincontent-card {
+  padding-top: 16px;
   z-index: 0;
 }
 /* Remove number input arrows for Market/Fund fields */

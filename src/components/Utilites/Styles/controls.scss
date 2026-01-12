@@ -1,0 +1,131 @@
+/* controls.css */
+
+/* Generic primary button */
+.maincontent-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  padding: 0 20px;
+  height: 36px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s;
+  background-color: #051a36;
+  color: #f3f6fa;
+}
+
+/* Variants */
+.maincontent-reset {
+  border: 1px solid #dde6ee;
+  background: #f3f6fa;
+  color: #121212;
+  font-size: 12px;
+}
+
+.maincontent-Run,
+.maincontent-view,
+.maincontent-new-participant {
+  background: #051a36;
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Export button */
+.CustomReports-export {
+  display: inline-flex;              
+  align-items: center;              
+  justify-content: center;          
+  gap: 6px;                         
+
+  background: #051a36;
+  color: #fff;
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  height: 30px;
+  padding: 0 12px;                 
+
+  cursor: pointer;
+  white-space: nowrap;              
+}
+
+/* Optional: icon alignment consistency */
+.maincontent-export svg {
+  display: block;
+}
+
+
+/* React-select control */
+.react-select__control {
+  background: #f3f6fa !important;
+  border: 1px solid #dde6ee !important;
+  border-radius: 8px !important;
+  min-height: 34px !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+  min-width: 40px !important;
+  color: #121212 !important;
+}
+
+.filter-select .react-select__control {
+  min-height: 34px !important;
+}
+
+/* React-select menu */
+.react-select__menu {
+  background: #fdfdfd !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(239, 239, 239, 0.1);
+  border: 1px solid #dde6ee;
+}
+
+.react-select__option {
+  font-size: 1rem;
+  padding: 10px 14px;
+}
+
+.react-select__option--is-focused,
+.react-select__option--is-selected {
+  background-color: rgb(241, 241, 241) !important;
+  color: #121212 !important;
+}
+
+/* Date inputs */
+.maincontent-filter {
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+  background: #f3f6fa;
+  height: 34px;
+  padding: 0 30px 0 14px;
+  width: 120px;
+  font-size: 12px;
+  font-family: "Geist", "Segoe UI", Arial, sans-serif;
+}
+
+.maincontent-filter[type="date"] {
+  padding: 0 8px;
+}
+
+/* Wrapper for icon inside date input */
+.filter-date-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Calendar icon overlay */
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
+}
+

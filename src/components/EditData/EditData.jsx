@@ -7,6 +7,7 @@ import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
 import Loader from "../Utilites/Loader/Loader.jsx";
 import api from "../../AuthContext/Api.jsx";
 import { useAuth } from "../../AuthContext/AuthContext.jsx";
+
 import "./EditData.scss";
 
 /* ---------- helper hook: stable API loader ---------- */
@@ -394,7 +395,7 @@ export default function Editdata() {
       { key: "FirstName", label: "First Name" },
       { key: "LastName", label: "Last Name" },
       { key: "EmailAddress", label: "Email Address" },
-      { key: "DateOfBirth", label: "DOB" },
+      // { key: "DateOfBirth", label: "DOB" },
       { key: "City", label: "City" },
       { key: "State", label: "State" },
       { key: "PostalCode", label: "Postal Code" },
@@ -446,7 +447,7 @@ export default function Editdata() {
       { key: "FirstName", label: "First Name" },
       { key: "LastName", label: "Last Name" },
       { key: "EmailAddress", label: "Email Address" },
-      { key: "DateOfBirth", label: "DOB" },
+      // { key: "DateOfBirth", label: "DOB" },
       { key: "Address1", label: "Address 1" },
       { key: "Address2", label: "Address 2" },
       { key: "City", label: "City" },
@@ -899,6 +900,7 @@ export default function Editdata() {
       : usersError;
 
   return (
+    <div className="MainContent-card EditContent-card">
     <div className="pa-screen">
       <div className="Operation-form">
         <header className="pa-header">
@@ -937,10 +939,10 @@ export default function Editdata() {
             <SearchBar
               placeholder={
                 activeTab === "participant"
-                  ? "Search participant name, type, number…"
+                  ? "Search name …"
                   : activeTab === "advisor"
-                  ? "Search agent name, type, number…"
-                  : "Search user name, email, phone…"
+                  ? "Search name, type …"
+                  : "Search name, email …"
               }
               debounceMs={250}
               onChange={(val) => setSearchQuery(String(val || "").trim())}
@@ -1057,6 +1059,7 @@ export default function Editdata() {
           onSave={handleSaveEdit}
         />
       </div>
+    </div>
     </div>
   );
 }

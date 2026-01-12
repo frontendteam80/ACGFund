@@ -10,15 +10,8 @@ export default function DetailsContent({
   primaryFields = null,
   remainingCols = [],
 }) {
-  const PRIMARY_FIELDS =
-    primaryFields || [
-      "Participant Number",
-      "Participant Name",
-      "Participant Type",
-      "First Name",
-      "Last Name",
-    ];
-
+  
+const PRIMARY_FIELDS = primaryFields || null;
   function showValue(key) {
     const v = row[key];
     if (v === null || v === undefined || String(v).trim() === "") return "N/A";
@@ -49,13 +42,14 @@ export default function DetailsContent({
   const additionalKeys =
     remainingCols && remainingCols.length > 0
       ? remainingCols
-      : Object.keys(row).filter((k) => !PRIMARY_FIELDS.includes(k));
-
+      
+          :Object.keys(row).filter((k) => !PRIMARY_FIELDS?.includes(k));
   return (
     <div className="dc-root">
-      <div className="dc-card dc-card--primary" aria-labelledby="user-info-heading">
-        <div className="dc-primary-grid">
-          {PRIMARY_FIELDS.map((key) => (
+          {PRIMARY_FIELDS && PRIMARY_FIELDS.length > 0 && (
+  <div className="dc-card dc-card--primary" aria-labelledby="user-info-heading">
+    <div className="dc-primary-grid">
+      {PRIMARY_FIELDS.map((key) => (
             <div className="dc-primary-col" key={key}>
               <div className="dc-label">{prettyLabel(key)}</div>
               <div className="dc-value">{showValue(key)}</div>
@@ -63,7 +57,7 @@ export default function DetailsContent({
           ))}
         </div>
       </div>
-
+          )}
       <div className="dc-card" aria-labelledby="additional-heading">
         <div className="dc-detail-grid">
           {additionalKeys.map((key) => (

@@ -1,412 +1,497 @@
 
 // src/components/CustomReports/MainContent.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useAuth } from '../../AuthContext/AuthContext.jsx';
-import { fetchCustomReportsList, fetchCustomReportData } from '../../AuthContext/Api.jsx';
-import Table from '../Utilites/Table/Table.jsx';
-import * as XLSX from 'xlsx';
-import { Download, RotateCw, Calendar } from 'lucide-react';
-import DatePicker from 'react-datepicker';
-// import "react-datepicker/dist/react-datepicker.css";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "../../AuthContext/AuthContext.jsx";
+import {
+  fetchCustomReportsList,
+  fetchCustomReportData,
+} from "../../AuthContext/Api.jsx";
+import Table from "../Utilites/Table/Table.jsx";
+import Loader from "../Utilites/Loader/Loader.jsx";
+import * as XLSX from "xlsx";
+import { Download, RotateCw, Calendar } from "lucide-react";
+import DatePicker from "react-datepicker";
 import Select from "../Utilites/DropDown/DropDown.jsx";
 import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
-import './CustomReports.css';
+import SlidePanel from "../Utilites/SlidePanel/SlidePanel.jsx";
+import DetailsContent from "../Utilites/SlidePanel/DetailsContent.jsx";
+import "./CustomReports.scss";
+
+/* ---------------- helpers ---------------- */
 
 function resolveUserId(u) {
-  if (!u) return null;
   return (
-    u.id ?? u.userId ?? u.UserID ?? u.UserId ?? u.profileId ?? u.sub ??
-    (u.raw && (u.raw.id ?? u.raw.userId)) ?? null
+    u?.id ??
+    u?.userId ??
+    u?.UserID ??
+    u?.UserId ??
+    u?.profileId ??
+    u?.sub ??
+    u?.raw?.id ??
+    u?.raw?.userId ??
+    null
   );
 }
 
 function roleAllowsReports(u) {
   if (!u) return false;
-  const raw = String(u.normalizedRole ?? u.role ?? u.roleName ?? '').toLowerCase();
-  const allowed = ['admin', 'administrator', 'ops', 'operation', 'operations', 'advisor', 'adviser', 'advisors'];
-  if (allowed.includes(raw)) return true;
-  const rolesArr = u.roles ?? u.Roles ?? (u.raw && u.raw.roles);
-  if (Array.isArray(rolesArr) && rolesArr.length > 0) {
-    const r = String(rolesArr[0]?.name ?? rolesArr[0]?.role ?? rolesArr[0] ?? '').toLowerCase();
-    if (allowed.includes(r)) return true;
+  const raw = String(u.normalizedRole ?? u.role ?? u.roleName ?? "")
+    .toLowerCase()
+    .trim();
+
+  if (
+    raw.includes("admin") ||
+    raw.includes("op") ||
+    raw.includes("advisor") ||
+    raw.includes("advis")
+  ) {
+    return true;
   }
-  return raw.includes('admin') || raw.includes('op') || raw.includes('advisor') || raw.includes('advis');
+
+  const rolesArr = u.roles ?? u.Roles ?? u.raw?.roles;
+  if (Array.isArray(rolesArr) && rolesArr.length > 0) {
+    const r = String(rolesArr[0]?.name ?? rolesArr[0]).toLowerCase();
+    return (
+      r.includes("admin") ||
+      r.includes("op") ||
+      r.includes("advisor") ||
+      r.includes("advis")
+    );
+  }
+
+  return false;
 }
 
-function isEndDateOnlyReportName(name) {
-  if (!name) return false;
-  const lower = String(name).toLowerCase();
-  const patterns = [
-    'bill pay char',
-    'bill add vendor',
-    'bill add vendors',
-    'bill pay charity',
-  ];
-  return patterns.some(p => lower.includes(p));
+function needsAnyDate(msg) {
+  if (!msg) return false;
+  return msg.toLowerCase().includes("date");
 }
+
+function needsBothDates(msg) {
+  if (!msg) return false;
+  const lower = msg.toLowerCase();
+  return lower.includes("begin date") && lower.includes("end date");
+}
+
+function needsOnlyEndDate(msg) {
+  if (!msg) return false;
+  const lower = msg.toLowerCase();
+  return lower.includes("end date") && !lower.includes("begin date");
+}
+
+function formatDateForApi(date) {
+  if (!date || !(date instanceof Date)) return "";
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+/* ---------------- component ---------------- */
 
 export default function MainContent({ activeItem }) {
   const { user } = useAuth();
 
+  const userId = useMemo(() => resolveUserId(user), [user]);
+  const token = useMemo(
+    () =>
+      user?.token ??
+      user?.accessToken ??
+      user?.authToken ??
+      localStorage.getItem("authToken") ??
+      null,
+    [user]
+  );
+
+  const canViewReports = roleAllowsReports(user);
+
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedReportId, setSelectedReportId] = useState('');
+
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedOperation, setSelectedOperation] = useState(null);
+  const [selectedReportId, setSelectedReportId] = useState("");
+  const [reportName, setReportName] = useState("");
+  const [selectedDisplayMessage, setSelectedDisplayMessage] = useState("");
 
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
+
   const [reportData, setReportData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
+  const [pendingFilters, setPendingFilters] = useState({});
+  const [showFilterDropdowns, setShowFilterDropdowns] = useState({});
+
   const [showSidebar, setShowSidebar] = useState(false);
-  const [sidebarData, setSidebarData] = useState(null);
-  const [reportName, setReportName] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState(null);
-  const [selectedOperation, setSelectedOperation] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  const normalizedActive = (activeItem || '').toString().trim().toLowerCase();
-  const userId = useMemo(() => resolveUserId(user), [user]);
-  const token = useMemo(
-    () => user?.token ?? user?.accessToken ?? user?.authToken ?? localStorage.getItem('authToken') ?? null,
-    [user]
-  );
-  const canViewReports = roleAllowsReports(user);
+  const autoLoadRef = useRef(null);
 
-  const autoLoadTimeoutRef = useRef(null);
-  const initialLoadRef = useRef(true);
+  const requiresAnyDate = needsAnyDate(selectedDisplayMessage);
+  const requiresBothDates = needsBothDates(selectedDisplayMessage);
+  const requiresOnlyEndDate = needsOnlyEndDate(selectedDisplayMessage);
+
+  /* -------- load reports list -------- */
 
   useEffect(() => {
-    let aborted = false;
-    async function loadReports() {
-      if (!canViewReports) {
-        setReports([]);
-        return;
-      }
-      if (!userId || !token) {
-        setReports([]);
-        setErrorMessage('Missing user id or token in auth context. Check console for the `user` object.');
-        return;
-      }
+    if (!canViewReports || !userId || !token) return;
 
-      setLoading(true);
-      setErrorMessage('');
-      try {
-        const arr = await fetchCustomReportsList(userId, token);
-        if (!aborted) {
-          setReports(arr || []);
-          if (!arr || arr.length === 0) setErrorMessage('No custom reports found for this user.');
-        }
-      } catch (err) {
-        if (!aborted) {
-          console.error('[MainContent] error loading reports:', err);
-          setReports([]);
-          setErrorMessage('Failed to load reports (see console).');
-        }
-      } finally {
-        if (!aborted) setLoading(false);
-      }
-    }
-    loadReports();
+    let cancelled = false;
+    setLoading(true);
+
+    fetchCustomReportsList(userId, token)
+      .then((res) => {
+        if (!cancelled) setReports(res || []);
+      })
+      .catch(() => {
+        if (!cancelled) setErrorMessage("Failed to load reports.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
     return () => {
-      aborted = true;
+      cancelled = true;
     };
-  }, [normalizedActive, userId, token, canViewReports, user]);
+  }, [userId, token, canViewReports, activeItem]);
+
+  /* -------- type / operation mapping -------- */
 
   const { typeOptions, operationsByType } = useMemo(() => {
-    const typesSet = new Set();
-    const grouped = {};
-    for (const r of reports) {
-      if (r.AdminCustomReportName && r.AdminCustomReportID) {
-        const [type, operation] = r.AdminCustomReportName.split(' - ');
-        if (type && operation) {
-          const t = type.trim();
-          typesSet.add(t);
-          if (!grouped[t]) grouped[t] = [];
-          grouped[t].push({
-            label: operation.trim(),
-            value: r.AdminCustomReportID,
-            fullLabel: r.AdminCustomReportName
-          });
-        }
-      }
-    }
+    const map = {};
+    const types = new Set();
+
+    reports.forEach((r) => {
+      if (!r.AdminCustomReportName || !r.AdminCustomReportID) return;
+      const [type, op] = r.AdminCustomReportName.split(" - ");
+      if (!type || !op) return;
+
+      const t = type.trim();
+      types.add(t);
+      if (!map[t]) map[t] = [];
+
+      map[t].push({
+        label: op.trim(),
+        value: r.AdminCustomReportID,
+        fullLabel: r.AdminCustomReportName,
+        displayMessage: r.AdminCustomReportDisplayMessage || "",
+      });
+    });
+
     return {
-      typeOptions: Array.from(typesSet).map(t => ({ label: t, value: t })),
-      operationsByType: grouped
+      typeOptions: Array.from(types).map((t) => ({ label: t, value: t })),
+      operationsByType: map,
     };
   }, [reports]);
 
   const typeOptionsWithAll = [{ label: "All", value: "all" }, ...typeOptions];
 
-  const filteredOperationOptions = useMemo(() => {
+  const operationOptions = useMemo(() => {
     if (!selectedType || selectedType.value === "all") {
       return Object.values(operationsByType).flat();
     }
     return operationsByType[selectedType.value] || [];
   }, [selectedType, operationsByType]);
 
+  /* -------- handlers -------- */
+
   const handleTypeChange = (opt) => {
     setSelectedType(opt);
     setSelectedOperation(null);
-    setSelectedReportId('');
-    setReportName('');
-    setErrorMessage('');
+    setSelectedReportId("");
+    setReportName("");
+    setSelectedDisplayMessage("");
     setFromDate(null);
     setToDate(null);
     setReportData([]);
+    setErrorMessage("");
   };
 
   const handleOperationChange = (opt) => {
     setSelectedOperation(opt);
-    setSelectedReportId(opt && opt.value !== "all" ? opt.value : '');
-    setReportName(opt && opt.value !== "all" ? opt.fullLabel : '');
-    setErrorMessage('');
+    setSelectedReportId(opt?.value || "");
+    setReportName(opt?.fullLabel || "");
+    setSelectedDisplayMessage(opt?.displayMessage || "");
     setFromDate(null);
     setToDate(null);
     setReportData([]);
+    setErrorMessage("");
   };
 
-  function formatDateForApi(date) {
-    if (!date || !(date instanceof Date)) return '';
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${mm}-${dd}-${yyyy}`;
-  }
-
-  async function fetchMultipleReportsData(userIdParam, reportIds, tokenParam, from, to) {
-    const combinedData = [];
-    for (const id of reportIds) {
-      const data = await fetchCustomReportData(userIdParam, id, tokenParam, from, to);
-      if (Array.isArray(data)) combinedData.push(...data);
-    }
-    return combinedData;
-  }
-
-  const activeReportLabel = reportName || (selectedOperation && selectedOperation.fullLabel) || '';
-  const showOnlyEndDate = isEndDateOnlyReportName(activeReportLabel);
+  /* -------- FETCH LOGIC (updated dates) -------- */
 
   const handleView = async () => {
-    setErrorMessage('');
-    if (!userId || !token) {
-      setErrorMessage('Missing user id or token.');
-      return;
-    }
+    if (!userId || !token || !selectedReportId) return;
+
     setDataLoading(true);
+    setErrorMessage("");
 
     try {
-      const beginDate = showOnlyEndDate ? '' : formatDateForApi(fromDate);
-      const endDate = formatDateForApi(toDate);
+      // 1) Always compute from pickers
+      let beginDate = fromDate ? formatDateForApi(fromDate) : "";
+      let endDate = toDate ? formatDateForApi(toDate) : "";
 
-      if (showOnlyEndDate && !endDate) {
-        setErrorMessage('Please select an End Date.');
-        setDataLoading(false);
-        return;
-      }
-
-      if ((!selectedType || selectedType.value === "all") && (!selectedOperation || selectedOperation.value === "all")) {
-        const allReportIds = reports.map(r => r.AdminCustomReportID);
-        const allData = await fetchMultipleReportsData(userId, allReportIds, token, beginDate, endDate);
-        setReportData(allData);
-        setReportName("All Reports");
-      }
-      else if (selectedType && selectedType.value !== "all" && (!selectedOperation || selectedOperation.value === "all")) {
-        const reportIdsForType = operationsByType[selectedType.value]?.map(opt => opt.value) || [];
-        const data = await fetchMultipleReportsData(userId, reportIdsForType, token, beginDate, endDate);
-        setReportData(data);
-        setReportName(`All ${selectedType.label} Reports`);
-      }
-      else {
-        if (!selectedReportId) {
-          setErrorMessage('Please select a report.');
+      // 2) End-date-only reports
+      if (requiresOnlyEndDate) {
+        if (!endDate) {
+          setErrorMessage("Please select an End Date.");
           setDataLoading(false);
           return;
         }
-        const rows = await fetchCustomReportData(userId, selectedReportId, token, beginDate, endDate);
-        setReportData(rows || []);
-        const name = reports.find(r => r.AdminCustomReportID === selectedReportId)?.AdminCustomReportName || '';
-        setReportName(name);
+        if (!beginDate) beginDate = endDate;
       }
-    } catch (err) {
-      console.error('[MainContent] error fetching report data:', err);
+
+      // 3) Begin+End reports
+      if (requiresBothDates) {
+        if (!beginDate || !endDate) {
+          setErrorMessage("Please select Begin Date and End Date.");
+          setDataLoading(false);
+          return;
+        }
+      }
+
+      // For no‑message reports: dates optional but whatever is picked is sent
+      console.log("[CustomReports] dates:", {
+        beginDate,
+        endDate,
+        selectedReportId,
+      });
+
+      const data = await fetchCustomReportData(
+        userId,
+        selectedReportId,
+        token,
+        beginDate,
+        endDate
+      );
+
+      setReportData(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("[MainContent] error fetching report data:", e);
       setReportData([]);
-      setErrorMessage('Failed to load report data (see console).');
+      setErrorMessage("Failed to load report data.");
     } finally {
       setDataLoading(false);
     }
   };
 
+  /* -------- AUTO LOAD RULES (old behavior) -------- */
+
+  // Load when End Date selected
   useEffect(() => {
-    if (!showOnlyEndDate) return;
-    if (!toDate || !selectedReportId) return;
+    if (!selectedReportId || !toDate) return;
 
-    const t = setTimeout(() => {
-      handleView();
-    }, 150);
+    clearTimeout(autoLoadRef.current);
+    autoLoadRef.current = setTimeout(handleView, 200);
 
-    return () => clearTimeout(t);
-  }, [toDate, selectedReportId, showOnlyEndDate]);
+    return () => clearTimeout(autoLoadRef.current);
+  }, [toDate, selectedReportId]);
+
+  // Load when report selected (no end date yet)
+  useEffect(() => {
+    if (!selectedReportId || toDate) return;
+
+    clearTimeout(autoLoadRef.current);
+    autoLoadRef.current = setTimeout(handleView, 300);
+
+    return () => clearTimeout(autoLoadRef.current);
+  }, [selectedReportId]);
+
+  /* -------- filters, search, filter summary -------- */
+
+  const toggleFilterDropdown = (column) => {
+    setShowFilterDropdowns((prev) => ({
+      ...prev,
+      [column]: !prev[column],
+    }));
+  };
+
+  const handleFilterChangeCol = (column, selected) => {
+    let normalized;
+    if (Array.isArray(selected)) normalized = selected;
+    else if (selected) normalized = [selected];
+    else normalized = [];
+
+    setPendingFilters((prev) => ({
+      ...prev,
+      [column]: normalized,
+    }));
+  };
+
+  const applyFilterColumn = (column) => {
+    setFilters((prev) => ({
+      ...prev,
+      [column]: pendingFilters[column] || [],
+    }));
+    setShowFilterDropdowns((prev) => ({
+      ...prev,
+      [column]: false,
+    }));
+  };
+
+  const clearFilterColumn = (column) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      delete next[column];
+      return next;
+    });
+    setPendingFilters((prev) => {
+      const next = { ...prev };
+      delete next[column];
+      return next;
+    });
+  };
+
+  const clearAllFilters = () => {
+    setFilters({});
+    setPendingFilters({});
+    setShowFilterDropdowns({});
+  };
+
+  const filteredReportData = useMemo(() => {
+    let data = reportData;
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      data = data.filter((row) =>
+        Object.values(row).some((v) =>
+          String(v ?? "").toLowerCase().includes(term)
+        )
+      );
+    }
+
+    Object.entries(filters).forEach(([col, optionsArray]) => {
+      if (!Array.isArray(optionsArray) || optionsArray.length === 0) return;
+      const allowed = optionsArray.map((opt) => String(opt?.value ?? ""));
+      data = data.filter((row) =>
+        allowed.includes(String(row[col] ?? ""))
+      );
+    });
+
+    return data;
+  }, [reportData, searchTerm, filters]);
+
+  const columnFilterOptions = useMemo(() => {
+    const options = {};
+    if (filteredReportData.length === 0) return options;
+
+    const allColumns = Object.keys(filteredReportData[0]);
+    allColumns.forEach((col) => {
+      const unique = [
+        ...new Set(
+          filteredReportData
+            .map((row) => row[col])
+            .filter(
+              (val) => val !== null && val !== undefined && val !== ""
+            )
+        ),
+      ];
+      options[col] = unique
+        .map((val) => ({ label: String(val), value: String(val) }))
+        .slice(0, 50);
+    });
+    return options;
+  }, [filteredReportData]);
+
+  /* -------- reset -------- */
 
   const handleReset = () => {
     setSelectedType(null);
     setSelectedOperation(null);
-    setSelectedReportId('');
+    setSelectedReportId("");
     setFromDate(null);
     setToDate(null);
     setReportData([]);
-    setReportName('');
-    setErrorMessage('');
-    setSearchTerm('');
+    setReportName("");
+    setSearchTerm("");
+    setFilters({});
+    setPendingFilters({});
+    setShowFilterDropdowns({});
+    setErrorMessage("");
+    setSelectedDisplayMessage("");
   };
 
-  useEffect(() => {
-    if (!selectedReportId || !userId || !token) return;
-    if (initialLoadRef.current) {
-      initialLoadRef.current = false;
-    }
-    if (autoLoadTimeoutRef.current) {
-      clearTimeout(autoLoadTimeoutRef.current);
-    }
-    autoLoadTimeoutRef.current = setTimeout(() => {
-      handleView();
-    }, 300);
-    return () => {
-      if (autoLoadTimeoutRef.current) {
-        clearTimeout(autoLoadTimeoutRef.current);
-      }
-    };
-  }, [selectedReportId, userId, token]); // included userId & token to avoid stale values
+  /* -------- render (old layout + summary) -------- */
 
-  const allColumns = reportData.length > 0 ? Object.keys(reportData[0]) : [];
+  const allColumns = reportData[0] ? Object.keys(reportData[0]) : [];
   const visibleColumns = allColumns.slice(0, 6);
   const hiddenColumns = allColumns.slice(6);
-  const showDetailsColumn = hiddenColumns.length > 0;
-
-  const filteredReportData = useMemo(() => {
-    if (!searchTerm.trim()) return reportData;
-    return reportData.filter(row => {
-      return allColumns.some(col => {
-        const value = row[col];
-        return value && value.toString().toLowerCase().includes(searchTerm.trim().toLowerCase());
-      });
-    });
-  }, [reportData, searchTerm, allColumns]);
-
-  const openSidebar = (row) => {
-    const details = Object.fromEntries(hiddenColumns.map(c => [c, row[c]]));
-    setSidebarData(details);
-    setShowSidebar(true);
-  };
-
-  const closeSidebar = () => {
-    setSidebarData(null);
-    setShowSidebar(false);
-  };
-
-  const handleExportToExcel = () => {
-    if (!reportData || reportData.length === 0) {
-      alert('No data to export');
-      return;
-    }
-    const worksheet = XLSX.utils.json_to_sheet(filteredReportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, reportName || 'Report');
-    const fileName = `${reportName || 'Report'}_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
-  };
 
   return (
-    <main className="maincontent-container">
-      <div className="maincontent-filters-row">
-        <div>
-          <div style={{ display: 'flex', gap: 115, alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-              <div style={{ minWidth: 150 }}>
-                <Select
-                  options={typeOptionsWithAll}
-                  value={selectedType}
-                  onChange={handleTypeChange}
-                  isClearable
-                  placeholder="Select Report"
-                  classNamePrefix="react-select"
-                />
-              </div>
-              <div style={{ minWidth: 180 }}>
-                <Select
-                  options={filteredOperationOptions}
-                  value={selectedOperation}
-                  onChange={handleOperationChange}
-                  isClearable
-                  isSearchable
-                  isDisabled={!selectedType || loading}
-                  placeholder="Select Report Type"
-                  classNamePrefix="react-select"
-                />
-              </div>
+    <main className="CustomReports-container">
+      {errorMessage && <div className="notification-row">{errorMessage}</div>}
 
-              <div style={{ position: "relative", display: "inline-block" }}>
-                {!showOnlyEndDate && (
-                  <div style={{ position: "relative", display: "inline-block", marginRight: 8 }}>
-                    <DatePicker
-                      selected={fromDate}
-                      onChange={setFromDate}
-                      dateFormat="MM-dd-yyyy"
-                      placeholderText="BeginDate"
-                      className="maincontent-filter"
-                    />
-                    <Calendar
-                      size={18}
-                      style={{ position: 'absolute', right: '10px', top: '45%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280' }}
-                    />
-                  </div>
-                )}
+      <div className="CustomReports-filters-row">
+        <div className="filters-left">
+          <Select
+            options={typeOptionsWithAll}
+            value={selectedType}
+            onChange={handleTypeChange}
+            isClearable
+            placeholder="Select Report"
+          />
 
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <DatePicker
-                    selected={toDate}
-                    onChange={date => {
-                      setToDate(date);
-                      setErrorMessage('');
-                    }}
-                    dateFormat="MM-dd-yyyy"
-                    placeholderText="End Date"
-                    className="maincontent-filter"
-                  />
-                  <Calendar
-                    size={18}
-                    style={{ position: 'absolute', right: '10px', top: '45%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280' }}
-                  />
-                </div>
-              </div>
+          <Select
+            options={operationOptions}
+            value={selectedOperation}
+            onChange={handleOperationChange}
+            isClearable
+            isSearchable
+            isDisabled={!selectedType}
+            placeholder="Select Report Type"
+          />
 
-              <button
-                className="maincontent-btn maincontent-reset"
-                onClick={handleReset}
-                type="button"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <RotateCw size={18} />
-                Reset Filters
-              </button>
-            </div>
-          </div>
+          <div className="filter-date-wrapper">
+             <DatePicker
+               selected={fromDate}
+              onChange={setFromDate}
+               dateFormat="MM-dd-yyyy"
+               placeholderText="Begin Date"
+              className="maincontent-filter"
+           />
+            <Calendar size={18} className="calendar-icon" />
+           </div>
+
+           <div className="filter-date-wrapper">
+            <DatePicker
+               selected={toDate}
+               onChange={(date) => {
+                 setToDate(date);
+                setErrorMessage("");
+               }}
+              dateFormat="MM-dd-yyyy"
+              placeholderText="End Date"
+               className="maincontent-filter"
+             />
+             <Calendar size={18} className="calendar-icon" />
+           </div>
         </div>
+
+        <button
+          className="maincontent-btn maincontent-reset"
+          onClick={handleReset}
+          type="button"
+        >
+          <RotateCw size={18} /> Reset Filters
+        </button>
       </div>
 
-      {errorMessage && (
-        <div style={{ color: 'crimson', padding: 8 }}>{errorMessage}</div>
-      )}
-
-      <div className="maincontent-card">
-        <div className="maincontent-title-row">
-          <div style={{ fontWeight: 'bold', marginBottom: 12, color: '#121212' }}>
+      <div className="MainContent-card">
+        <div className="CustomReports-title-row">
+          <div style={{ fontWeight: "bold", marginBottom: 12, color: "#121212" }}>
             {reportName ? (
-              <>Report: <span style={{ fontWeight: 600 }}>{reportName}</span> </> 
+              <>
+                Report: <span style={{ fontWeight: 600 }}>{reportName}</span>
+              </>
             ) : (
-              <>Report Results </>
+              <>Report Results</>
             )}
           </div>
-          <div className="maincontent-search-export">
+          <div className="CustomReports-search-export">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
@@ -415,12 +500,27 @@ export default function MainContent({ activeItem }) {
               className="maincontent-search"
             />
             <button
-              className="maincontent-export"
-              onClick={handleExportToExcel}
-              disabled={!reportData || reportData.length === 0}
+              className="CustomReports-export"
+              onClick={() => {
+                if (!filteredReportData.length) {
+                  alert("No data to export");
+                  return;
+                }
+                const ws = XLSX.utils.json_to_sheet(filteredReportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(
+                  wb,
+                  ws,
+                  reportName || "Report"
+                );
+                const fileName = `${
+                  reportName || "Report"
+                }_${new Date().toISOString().split("T")[0]}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+              }}
+              disabled={!filteredReportData.length}
               title="Export to Excel"
               type="button"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <Download size={18} />
               Export to Excel
@@ -428,51 +528,77 @@ export default function MainContent({ activeItem }) {
           </div>
         </div>
 
-        {dataLoading ? (
-          <div className="maincontent-empty">Loading Report Data...</div>
-        ) : reportData.length > 0 ? (
-          <div className="report-table-wrapper" style={{ position: 'relative' }}>
-            <Table
-              columns={visibleColumns}
-              data={filteredReportData}
-              onDetails={openSidebar}
-              showDetailsColumn={showDetailsColumn}
-            />
+        {Object.keys(filters).length > 0 && (
+          <div className="filter-summary">
+            <ul className="filter-summary-list">
+              {Object.entries(filters).map(([column, optionsArray]) => (
+                <li key={column}>
+                  {Array.isArray(optionsArray)
+                    ? optionsArray.map((o) => o.label).join(", ")
+                    : ""}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={clearAllFilters}
+              className="filter-summary-clear-btn"
+              type="button"
+            >
+              Clear All Filters
+            </button>
           </div>
+        )}
+
+        {dataLoading ? (
+          <div className="maincontent-empty">
+            <Loader text="Loading Reports..." size={40} />
+          </div>
+        ) : reportData.length > 0 ? (
+          <Table
+            columns={visibleColumns}
+            data={filteredReportData}
+            onDetails={(row) => {
+              setSelectedRow(row);
+              setShowSidebar(true);
+            }}
+            showDetailsColumn={hiddenColumns.length > 0}
+            showFilters
+            onFilterToggle={toggleFilterDropdown}
+            isFilterActive={pendingFilters}
+            showFilterDropdowns={showFilterDropdowns}
+            columnFilterOptions={columnFilterOptions}
+            onFilterChange={handleFilterChangeCol}
+            onFilterClear={clearFilterColumn}
+            onFilterApply={applyFilterColumn}
+          />
         ) : (
           <div className="maincontent-empty">
-            <svg width="48" height="48" fill="#BCC9DB" style={{ marginBottom: 12 }}>
+             <svg width="48" height="48" fill="#BCC9DB" style={{ marginBottom: 12 }}>
               <rect x="9" y="26" width="6" height="13" rx="2" />
-              <rect x="21" y="21" width="6" height="18" rx="2" />
+               <rect x="21" y="21" width="6" height="18" rx="2" />
               <rect x="33" y="31" width="6" height="8" rx="2" />
-            </svg>
-            <div className="maincontent-empty-text">
-              {reportName ? 'No data for selected report.' : 'Select type and operation to load data.'}
-            </div>
-          </div>
+             </svg>
+             <div className="maincontent-empty-text">
+               {reportName
+                ? "No data for selected report."
+                : "Select type and operation to load data."}
+             </div>
+           </div>
         )}
       </div>
 
-      {showSidebar && (
-        <aside className="details-sidebar open">
-          <div className="sidebar-header">
-            <button className="sidebar-close-btn" onClick={closeSidebar} type="button">×</button>
-            <h2>Details</h2>
-          </div>
-          <div className="sidebar-content">
-            {sidebarData && Object.keys(sidebarData).length > 0 ? (
-              Object.entries(sidebarData).map(([key, val]) => (
-                <div className="sidebar-row" key={key}>
-                  <span className="sidebar-label">{key}:</span>
-                  <span className="sidebar-value">{val == null ? '' : String(val)}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: '#788' }}>No details available</div>
-            )}
-          </div>
-        </aside>
+      {showSidebar && selectedRow && (
+        <SlidePanel
+          open={showSidebar}
+          onClose={() => setShowSidebar(false)}
+          title={`Details - ${reportName}`}
+          width="520px"
+        >
+          <DetailsContent row={selectedRow} remainingCols={hiddenColumns} />
+        </SlidePanel>
       )}
     </main>
   );
 }
+
+

@@ -1,0 +1,91 @@
+@import "../Utilites/Styles/typography.scss";
+
+.letters-root {
+  padding: 24px;
+  max-width: 1400px;
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size);
+}
+.letter-input-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+   margin-Top: 20px;
+}
+
+.letter-radio-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width:340px;
+  gap: 16px;
+}
+
+.letter-radio {
+  display: flex;
+  width:150px;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  input[type="radio"] {
+    cursor: pointer;
+    accent-color: #0052CC;
+  }
+}
+
+.letter-number-input {
+  height: 32px;
+  min-width: 150px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #dde6ee;
+  outline: none;
+
+  &:focus {
+    border-color: #051a36;
+  }
+}
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width:100px
+//   margin-left: auto; /* pushes buttons to the end */
+}
+
+.buttons button {
+  height: 32px;
+  min-width: 90px;
+  padding: 0 14px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* View button */
+.Reports-view-button {
+  background: #051a39;
+  color: #ffffff;
+}
+
+/* Download button */
+.buttons button:last-child {
+  background: #f3f6fa;
+  color: #051a39;
+  border: 1px solid #dde6ee;
+}
+.Reports-generate-button{
+   background: #051a39;
+  color: #ffffff; 
+  height:32px;
+   border-radius: 6px;
+}

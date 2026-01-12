@@ -3,18 +3,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./SearchBar.scss";
 
-/**
- * Reusable SearchBar component
- *
- * Props:
- *  - value (string, optional) controlled value
- *  - defaultValue (string, optional) uncontrolled initial value
- *  - onChange (fn) => called immediately on input change with new value
- *  - onSearch (fn) => called after debounceMs with final value
- *  - placeholder (string)
- *  - debounceMs (number) default 300
- *  - className (string) additional classes
- */
+
 export default function SearchBar({
   value,
   defaultValue = "",

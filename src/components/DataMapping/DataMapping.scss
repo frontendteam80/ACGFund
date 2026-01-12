@@ -1,0 +1,141 @@
+// .mapping-form {
+//   max-width: 1100px;
+//   background: #fff;
+//   padding: 20px 24px;
+//   border-radius: 12px;
+// }
+
+/* Section title like "Contact Details" */
+.form-section-title {
+  margin: 18px 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.form-title{
+    font-size: 14px;
+    margin-top: 0;
+}
+
+/* Row with multiple fields */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+/* 2-column row */
+ .form-row.two {
+   grid-template-columns: repeat(2, 1fr);
+ }
+
+
+/* 3-column row */
+.form-row.three {
+  
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Single field */
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+.Date-fields{
+    gap:16px;
+    display:flex;
+    flex-direction: row;
+}
+.BeginDate{
+    // width:270px;
+     width:170px;
+}
+.EndDate{
+    // width:280px;
+     width:180px;
+}
+.form-field label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+.form-field input,
+.form-field select {
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.form-field input::placeholder {
+  color: #cbd5e1;
+}
+.displayrequestparamtype{
+    width:275px;
+}
+.error {
+  font-size: 11px;
+  color: #e85757;
+  margin-top: 2px;
+}
+
+/* Actions */
+.form-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.btn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn.primary {
+  background: #051a36;
+  color: #fff;
+}
+
+.btn.ghost {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.css-hlgwow {
+  padding: 0 !important;
+  padding-left: 2px !important;
+}
+.process-msg{
+  padding:0 !important;
+}
+.header-searchbar{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.icon-btn{
+  background: none;
+  border: none;
+}
+// .customreports-fields{
+//   display:flex;
+//   flex-direction: column;
+// }
+// .Access-Date{
+//   display:flex;
+//   flex-direction: column;
+// }
+.view{
+  width:150px;
+}
+.order{
+  width:120px;
+}

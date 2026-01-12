@@ -68,6 +68,7 @@ const CreateNew = ({ token: tokenProp }) => {
   }
 
   return (
+    <div className="MainContent-card CreateContent-Card">
     <div className="create-new-container">
       <div className="tabs-container" role="tablist" aria-label="Create new">
         <button
@@ -134,6 +135,7 @@ const CreateNew = ({ token: tokenProp }) => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

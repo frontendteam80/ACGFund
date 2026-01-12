@@ -1,5 +1,8 @@
-
-
+@import "../Utilites/Styles/layout.scss";
+.CreateContent-Card{
+  margin-left: 20px;
+  padding: 0px !important;
+}
  .create-new-container {
   // width: 100%;
   // max-width: 1200px;
@@ -25,6 +28,7 @@
     border: none;
     border-bottom: 3px solid transparent;
     color: #6b7280;
+    font-family: 'Geist', Arial, sans-serif;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
@@ -79,7 +83,8 @@
   
   .sidebar-form {
     background: white;
-     padding-top: 20px;
+    margin-top: 10px;
+     padding: 20px 10px 0 10px;
     border-radius: 8px;
     // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     
@@ -87,8 +92,8 @@
       font-size: 16px;
       font-weight: 600;
       color: #051a36;
-      margin-top: 24px;
-      margin-bottom: 16px;
+      // margin-top: 24px;
+      // margin-bottom: 16px;
       
       &:first-of-type {
          margin-top: 0;
@@ -100,9 +105,9 @@
   .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+    // gap: 16px;
+  //   margin-bottom: 24px;
+   }
   
   .field {
     display: flex;
@@ -144,6 +149,7 @@
     .btn {
       padding: 10px 20px;
       border-radius: 6px;
+      font-family:'Geist', Arial, sans-serif ;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;

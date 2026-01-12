@@ -4,11 +4,13 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "../../AuthContext/AuthContext.jsx";
 import { fetchFunds, addFundPrice } from "../../AuthContext/Api.jsx";
 import Table from "../Utilites/Table/Table.jsx";
+import SearchBar from "../Utilites/SearchBar/SearchBar.jsx";
+import Loader from "../Utilites/Loader/Loader.jsx";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Calendar } from "lucide-react";
-import "../CustomReports/CustomReports.css";
+import { Calendar, RotateCw } from "lucide-react";
+import "../CustomReports/CustomReports.scss";
 import "./FundPrice.scss";
 
 /* ---------------------- helpers ---------------------- */
@@ -473,15 +475,14 @@ export default function FundPrice() {
 
   if (!isAuthorized) {
     return (
-      <main className="maincontent-container">
+      <main className="FundPrice-container">
         <div
-          className="maincontent-card"
+          className="MainContent-card"
           style={{ padding: 20, textAlign: "center" }}
         >
           <h2>Access denied</h2>
           <p>
-            You do not have permission to view or edit fund prices. If you
-            believe this is an error, contact your administrator.
+            You do not have permission to view or edit fund prices.
           </p>
           <div style={{ marginTop: 8, color: "#555" }}>
             <small>
@@ -494,8 +495,16 @@ export default function FundPrice() {
   }
 
   return (
-    <main className="maincontent-container">
+    <main className="FundPrice-container">
       <div className="fundprice-wrapper">
+        <div className="fundprice-messages">
+            {errorMessage && (
+              <div style={{ color: "crimson", marginTop: 8 }}>{errorMessage}</div>
+            )}
+            {successMessage && (
+              <div style={{ color: "green", marginTop: 8 }}>{successMessage}</div>
+            )}
+          </div>
         {/* LEFT: form */}
         <form
           className="fundprice-form"
@@ -504,14 +513,7 @@ export default function FundPrice() {
             handleAddClick();
           }}
         >
-          <div className="fundprice-messages">
-            {errorMessage && (
-              <div style={{ color: "crimson", marginTop: 8 }}>{errorMessage}</div>
-            )}
-            {successMessage && (
-              <div style={{ color: "green", marginTop: 8 }}>{successMessage}</div>
-            )}
-          </div>
+          
 
           {/* Select Fund */}
           <div className="fundprice-form-field">
@@ -688,6 +690,7 @@ export default function FundPrice() {
               className="maincontent-btn maincontent-reset"
               onClick={handleReset}
             >
+              <RotateCw size={18} />
               Reset
             </button>
           </div>
@@ -750,24 +753,26 @@ export default function FundPrice() {
       </div>
 
       {/* TABLE */}
-      <div className="maincontent-card">
+      <div className="MainContent-card">
         <div
-          className="maincontent-title-row"
+          className="FundPrice-title-row"
           style={{ marginBottom: "10px" }}
         >
           <div style={{ fontWeight: 700 }}>Fund Prices</div>
-          <div style={{ marginLeft: "auto" }}>
-            <input
-              className="maincontent-search"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search funds"
-            />
-          </div>
+          <div style={{ marginLeft: "auto", maxWidth: 260 }}>
+          <SearchBar
+            placeholder="Search funds..."
+            debounceMs={250}
+            onSearch={(val) => setSearchTerm(val)}
+            
+          />
+        </div>
         </div>
 
         <div>
+          
+                    {/* <Loader text="Loading grants..." size={40} /> */}
+                  
           <Table
             columns={[
               "FundID",

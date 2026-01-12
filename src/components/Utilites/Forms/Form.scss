@@ -1,5 +1,8 @@
 
 
+/* src/Forms/Form.scss - Complete cleaned version */
+@import "../Styles/typography.scss";
+/* Sidebar Container */
 .details-sidebar {
   position: fixed;
   top: 0;
@@ -13,17 +16,26 @@
   display: flex;
   flex-direction: column;
   padding: 20px 20px;
-  /* overflow-y: auto; */
 }
-.details-sidebar.open { right: 0; }
 
+.details-sidebar.open { 
+  right: 0; 
+}
+
+/* Header */
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  gap: 12px;
 }
-.sidebar-header h2 { margin: 0; font-size: 18px; color: #0f172a; }
+
+.sidebar-header h2 { 
+  margin: 0; 
+  font-size: 18px; 
+  color: #0f172a; 
+}
 
 .sidebar-close-btn {
   background: transparent;
@@ -31,150 +43,520 @@
   font-size: 1.6rem;
   cursor: pointer;
   color: #475569;
+  padding: 0 7px;
 }
 
-.sidebar-form { display: flex; flex-direction: column; gap: 12px; }
+/* Form Structure */
+.sidebar-form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px;
+  flex: 1;
+}
 
-/* responsive grid similar to your screenshot: 3 columns on wide, 2 on medium, 1 on small */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  // gap: 20px 20px;
+  flex: 1;
 }
 
-.field { display: flex; flex-direction: column; }
-.field-label { font-size: 14px; color: hsl(0, 0%, 20%); margin-bottom: 6px; }
+/* Left Column - Personal Details */
+.personal-details {
+  max-width: 600px;
+  padding-right: 20px;
+  border-right: 1px solid #d7d2d2;
+}
+
+.personal-details h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+/* Right Column - Sidebar Section */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  padding-left: 10px;
+}
+
+/* Field Rows */
+.field-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.field-row.full-width {
+  gap: 10px;
+}
+
+/* Field Styling */
+.field { 
+  display: flex; 
+  flex-direction: column; 
+  flex: 1;
+  max-width: 170px;
+}
+
+.field.full-width {
+  grid-column: 1 / -1;
+  max-width: 100%;
+}
+
+.field-label { 
+  font-size: 14px; 
+  color: hsl(0, 0%, 20%); 
+  margin-bottom: 6px; 
+  font-weight: 500;
+}
 
 .field input,
 .field select {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #e6e9ef;
-  font-size: 16px;
+  font-size: 12px !important;
   color: hsl(0, 0%, 20%);
-  
+  transition: border-color 0.2s;
 }
 
-.field input::placeholder { color: #e1dfdf; opacity: 1; }
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #071a3e;
+  box-shadow: 0 0 0 3px rgba(7, 26, 62, 0.1);
+}
 
-/* make some inputs span full width of the grid */
-/* .field.full-width { grid-column: 1 / -1; } */
+.field input::placeholder { 
+  color: #e1dfdf; 
+  opacity: 1; 
+}
+.Role{
+  min-width:340px
+}
+.Phonenumber{
+  min-width:260px ;
+}
+.Homenumber{
+  min-width:260px ;
+}
+.Address1{
+  min-width:260px ;
+}
+.Address2{
+  min-width:260px ;
+}
+.city{
+  max-width:125px ;
+}
+.state{
+  max-width:125px ;
+}
+.ZipCode{
+  max-width:125px ;
+}
+.Country{
+  max-width:125px ;
+}
 
-.sidebar-actions {
+.location-fields{
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
+  width:600px;
+}
+.Notes{
+ min-width:530px;
+ margin-bottom: 0;
+}
+/* Date Picker */
+.date-field .date-wrapper {
+  width:200px;
+  position: relative;
+  max-width: 190px;
+}
+.Participantlabel{
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
-.btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-.btn.ghost { background: #fff; border: 1px solid #e6e9ef; color: #0f172a; }
-.btn.primary { background: #071a3e; color: #fff; }
+ .Email {
+  min-width:262px;
+ }
 
-/* Responsive breakpoints */
-@media (max-width: 1024px) {
-  .form-grid { grid-template-columns: repeat(2, 1fr); }
-  .details-sidebar { overflow-y: auto; }
-}
-@media (max-width: 640px) {
-  .details-sidebar { width: 100%; right: -100%; overflow-y: auto; }
-  .details-sidebar.open { right: 0; }
-  .form-grid { grid-template-columns: 1fr; }
-  .sidebar-actions { flex-direction: row-reverse; }
-}
-
-.date-input-wrapper {
-  width: 80px; /* adjust as needed */
+.date-wrapper svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #64748b;
 }
 
 .date-input-small {
-  padding-right: 26px; /* space for calendar icon */
+  // padding-right: 32px !important;
+  max-width:160px;
   font-size: 14px;
 }
-.datepicker {
-  width: 80px;
+
+/* Participant Select Field */
+.participant-field {
+  margin: 10px 0;
+  max-width: 400px;
 }
 
-/* react-select overrides for advisor select (classNames: advisor__*) */
-.advisor__control {
-  margin: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  min-height: 34px;
-  box-sizing: border-box;
+.ParticipantName {
+  min-width:440px;
 }
 
-.advisor__value-container {
+.agent-details h4 {
+  // margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.agent-additional-title {
+  margin-top: 10px;
+  margin-bottom:0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+/* Notices */
+.notice {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.notice.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.notice.error,
+.notice.warn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.notice.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+}
+
+.password-error {
+  color: #dc2626;
+  margin-top: 6px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Autofill Trap */
+.autofill-trap {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Buttons */
+.form-actions,
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  // margin-top: auto;
+  // padding-top: 20px;
+}
+
+.btn { 
+  padding: 10px 20px; 
+  border-radius: 8px; 
+  border: none; 
+  cursor: pointer; 
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn.ghost { 
+  background: #fff; 
+  border: 1px solid #e6e9ef; 
+  color: #0f172a; 
+}
+
+.btn.primary { 
+  background: #071a3e; 
+  color: #fff; 
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: #0a224b;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  flex: 1;
+}
+
+.confirmation-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.confirmation-card h2 {
+  margin: 0 0 16px 0;
+  color: #0f172a;
+}
+
+.confirmation-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.confirmation-card li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.confirmation-card li:last-child {
+  border-bottom: none;
+}
+
+.confirmation-card strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* React Select Overrides */
+.dropdown-indicator-with-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Participant Select (replace advisor__ with participant__ if needed) */
+.participant__control,
+.css-b62m3t-control { /* Generated class fallback */
+  border-color: #d1d5bd !important;
+  min-height: 28px !important;
+  box-shadow: none !important;
+  border-radius: 6px !important;
+  max-height: 35px !important;
+}
+
+.participant__control:hover,
+.css-b62m3t-control:hover {
+  border-color: #d1d5db !important;
+}
+
+.participant__value-container,
+.css-19bb58m { /* Input container */
   padding: 0 6px !important;
   margin: 0 !important;
 }
 
-.advisor__single-value {
+.participant__single-value {
   margin: 0 !important;
   padding: 0 !important;
 }
 
-.advisor__placeholder {
+.participant__placeholder {
   margin: 0 !important;
   padding: 0 !important;
-  line-height: 20px;
+  line-height: 20px !important;
+  color: #e1dfdf !important;
 }
 
-.advisor__menu-list {
+.participant__menu {
+  z-index: 9999 !important;
+}
+
+.participant__menu-list {
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.advisor__option {
-  padding: 4px 8px !important;
-  margin: 0 !important;
-  line-height: 20px;
-}
-
-.advisor__menu {
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 9999;
-}
-
-/* Generated react-select input container class — keep the dot before it */
-.css-19bb58m {
-  visibility: visible;
-  -webkit-flex: 1 1 auto;
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
-  display: inline-grid;
-  grid-area: 1 / 1 / 2 / 3;
-  grid-template-columns: 0 min-content;
-  margin: 0px !important;
-  padding-top: 0 !important;
-  color: hsl(0, 0%, 20%);
-  box-sizing: border-box;
-}
-
-/* Removes the padding/margin from inside react-select input container */
-.advisor__input-container {
-  padding: 0 !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-
-  /* If you want to override the inline-grid layout */
-  display: flex !important;
-  align-items: center !important;
-}
-
-#react-select-5-input {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-#react-select-3-input {
-  border: none !important;
-  box-shadow: none !important;
-  grid: 1 !important;
-}
 .react-select__option--is-focused,
 .react-select__option--is-selected {
-   background-color: rgb(241, 241, 241) !important;
-   color:  #121212!important; 
+  background-color: rgb(241, 241, 241) !important;
+  color: #121212 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1600px) {
+  .details-sidebar {
+    width: 90vw;
+    right: -90vw;
+  }
+}
+
+@media (max-width: 1024px) {
+  .form-grid { 
+    grid-template-columns: 1fr; 
+    // gap: 16px;
+  }
+  .personal-details {
+    border-right: none;
+    padding-right: 0;
+    max-width: none;
+  }
+  .sidebar-section {
+    width: 100%;
+    padding-left: 0;
+  }
+  .details-sidebar { 
+    overflow-y: auto; 
+  }
+}
+
+@media (max-width: 640px) {
+  .details-sidebar { 
+    width: 100%; 
+    right: -100%; 
+    padding: 16px;
+  }
+  .details-sidebar.open { 
+    right: 0; 
+  }
+  .form-grid { 
+    grid-template-columns: 1fr; 
+  }
+  .field-row {
+    flex-direction: column;
+  }
+  .field {
+    min-width: 100%;
+  }
+  .form-actions,
+  .confirmation-actions {
+    flex-direction: column-reverse;
+  }
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* AddParticipantForm specific additions */
+.suffix-field {
+  max-width: 100px;
+}
+
+.advisor-field-row {
+  max-width: 400px;
+}
+
+.advisor-option-label {
+  font-weight: 500;
+}
+
+.add-advisor-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-advisor-btn:hover {
+  background: rgba(7, 26, 62, 0.1);
+  border-radius: 4px;
+}
+
+/* Participant Select specific overrides */
+.participant__control {
+  border-color: #d1d5bd !important;
+  min-height: 28px !important;
+  box-shadow: none !important;
+  border-radius: 6px !important;
+  max-height: 35px !important;
+}
+
+.participant__control:hover {
+  border-color: #d1d5db !important;
+}
+
+.participant__value-container {
+  padding: 0 6px !important;
+  margin: 0 !important;
+  font-size: inherit;
+  font-family: inherit;
+
+}
+
+.participant__single-value {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.participant__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 20px !important;
+  color: #e1dfdf !important;
+}
+
+.participant__menu {
+  z-index: 9999 !important;
+}
+
+.DateofBirthrow{
+
+  display:flex;
+  gap:20px;
+  margin-bottom: 16px;
+  width:580px
+}
+// .field-selectRole{
+//   width:370px
+// }
+/* 🔥 FIX react-select typed-text grey capsule */
+.css-11x7dxn[data-value] {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.react-select__input-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
 }
